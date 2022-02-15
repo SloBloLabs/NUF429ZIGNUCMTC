@@ -28,5 +28,5 @@ Upload to github
  - git config user.email "<<email>>"
  - git commit -m "First commit"
  - git branch -M main
- - git remote add origin https://github.com/SloBloLabs/<<ProjectRepo>>.git
+ - git remote add origin https://github.com/SloBloLabs/<"ProjectRepo">.git
  - git push -u origin master
