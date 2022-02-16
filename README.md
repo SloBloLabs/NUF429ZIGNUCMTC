@@ -1,5 +1,22 @@
 How to convert a CubeMX / CubeIDE project to GNU ARM Toolchain with CMake, openocd and VS Code
 
+Prerequisites
+
+Available on PATH
+ - ARM toolchain
+ - make
+ - cmake
+ - openocd
+
+VS Code extensions
+ - MS C/C++
+ - MS C/C++ Extension Pack
+ - Cortex Debug
+
+---
+
+Workflow
+
 Copy to project directory:
  - README.md
  - Makefile
@@ -18,6 +35,9 @@ then
  - add projectMain() to main.c (right before while loop)
  - right click CMakeLists.txt -> configure all projects
  - start coding
+
+Tested on
+ - Mac
 
 ---
 

@@ -1,5 +1,6 @@
 # Template CMakeLists.txt configuration for STM32 MCUS
-# https://www.youtube.com/watch?v=9tWRdnyWGb8
+# Following ideas and concepts from Matej Blagšič
+# https://youtu.be/9tWRdnyWGb8
 cmake_minimum_required(VERSION 3.12)
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include (gcc-arm-none-eabi)
@@ -77,7 +78,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
         #-Wold-style-cast # Deactivated, because there are lots of useless casts in LL lib
         #-Wuseless-cast # Deactivated, because there are lots of useless casts in LL lib
         -Wsuggest-override> # 
-    $<$<CONFIG:Debug>:-O0 -g3 -ggdb> # optimize debugging experience, produce debugging information on level 3 for gdb
+    $<$<CONFIG:Debug>:-Og -g3 -ggdb> # optimize debugging experience, produce debugging information on level 3 for gdb
     $<$<CONFIG:Release>:-O2>) # optimize debug experience (TODO: change that!), no debug information
 
 #--specs=nosys.specs
