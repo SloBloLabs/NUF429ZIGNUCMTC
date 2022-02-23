@@ -31,13 +31,14 @@ Copy to project directory:
 then
  - Adapt settings in CMakeLists.txt header
  - rename myAppMain [.hpp/.cpp]
- - include myAppMain.hpp in Core/Src/main.c
+ - include <"AppName">Main.hpp in Core/Src/main.c
  - add projectMain() to main.c (right before while loop)
  - right click CMakeLists.txt -> configure all projects
  - start coding
 
 Tested on
  - Mac
+ - Linux
 
 ---
 
@@ -49,4 +50,4 @@ Upload to github
  - git commit -m "First commit"
  - git branch -M main
  - git remote add origin https://github.com/SloBloLabs/<"ProjectRepo">.git
- - git push -u origin master
+ - git push -u origin main
