@@ -38,6 +38,7 @@ then
 
 Tested on
  - Mac
+ - Linux
 
 ---
 
