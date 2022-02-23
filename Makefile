@@ -2,7 +2,7 @@
 
 BUILD_DIR := build
 BUILD_TYPE ?= Debug
-# BUILD_TYPE ?= Debug
+# BUILD_TYPE ?= Release
 
 all: build
 
@@ -20,11 +20,11 @@ build: cmake
 flash: all
 	$(MAKE) -C ${BUILD_DIR} flash
 
-SRCS := $(shell find . -name '*.[ch]' -or -name '*.[ch]pp')
-format: $(addsuffix .format,${SRCS})
+#SRCS := $(shell find . -name '*.[ch]' -or -name '*.[ch]pp')
+#format: $(addsuffix .format,${SRCS})
 
-%.format: %
-	clang-format -i $<
+#%.format: %
+#	clang-format -i $<
 
 clean:
 	rm -rf $(BUILD_DIR)
