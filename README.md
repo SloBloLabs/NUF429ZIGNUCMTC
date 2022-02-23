@@ -37,8 +37,8 @@ then
  - start coding
 
 Tested on
- - Mac
- - Linux
+ - Mac (CMake 3.22.2, ARM Toolchain 10.3-2021.10, openocd 0.11.0 DEV g5ab74bde0, st-link 1.7.0)
+ - Linux (CMake 3.18.4, ARM Toolchain 9.2.1 20191025, openocd 0.11.0-rc2, st-link 1.6.1)
 
 ---
 
