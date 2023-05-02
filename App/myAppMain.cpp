@@ -5,7 +5,8 @@
 void projectMain() {
     // Configure and enable Systick timer including interrupt
     SysTick_Config(SystemCoreClock / 1000 - 1);
-    
+
+
     while(true) {
         while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin));
 
