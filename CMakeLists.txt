@@ -35,7 +35,11 @@ set(CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/App
+    ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/Target
+    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc)
 set(PROJECT_INCLUDE_DIRECTORIES
     #${CMAKE_CURRENT_SOURCE_DIR}
     ${APP_DIR})
@@ -43,7 +47,11 @@ set(PROJECT_INCLUDE_DIRECTORIES
 # Sources
 file(GLOB_RECURSE STM32CUBEMX_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/App/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/Target/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/*.c)
 file(GLOB_RECURSE PROJECT_SOURCES FOLLOW_SYMLINKS
     ${APP_DIR}/*.cpp
     ${APP_DIR}/*.c)
@@ -95,6 +103,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -Wl,--end-group
     -Wl,--gc-sections # garbage collector for sections so the linker can choose which sections to use after compilation (omits unused stuff, optimized code size)
     # -Wl,--print-gc-sections
+    -Wl,--no-warn-rwx-segments
     -Wl,--print-memory-usage) # print memory usage after linking
 
 # Disable overflow warnings from STM32Cube generated code of LL drivers
