@@ -87,6 +87,9 @@
   */
 /* Create buffer for reception and transmission           */
 /* It's up to user to redefine and/or remove those define */
+
+// TODO: see I-CUBE-USBD-Composite for ringbuffer implementation
+
 /** Received data over USB are stored in this buffer      */
 uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
 
@@ -153,7 +156,7 @@ static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 3 */
   /* Set Application Buffers */
-  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0, hUsbDeviceFS.classId);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
   return (USBD_OK);
   /* USER CODE END 3 */
@@ -286,8 +289,8 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   if (hcdc->TxState != 0){
     return USBD_BUSY;
   }
-  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
-  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len, hUsbDeviceFS.classId);
+  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS, hUsbDeviceFS.classId);
   /* USER CODE END 7 */
   return result;
 }
