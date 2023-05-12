@@ -55,9 +55,9 @@
 #define USE_USBD_COMPOSITE
 
 /* Activate Printer and CDC classes in composite builder */
-#define USBD_CMPSIT_ACTIVATE_AUDIO                         0U
+#define USBD_CMPSIT_ACTIVATE_AUDIO                         1U
 #define USBD_CMPSIT_ACTIVATE_CDC                           1U
-#define USBD_CMPSIT_ACTIVATE_DFU                           0U
+#define USBD_CMPSIT_ACTIVATE_DFU                           1U
 
 /* The definition of endpoint numbers must respect the order of classes instantiation  */
 #define AUDIO_OUT_EP                            0x01U  /* EP1 for HID data OUT */
