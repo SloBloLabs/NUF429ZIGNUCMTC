@@ -88,9 +88,14 @@ void MX_USB_DEVICE_Init(void)
   {
     Error_Handler();
   }
-  if (USBD_AUDIO_RegisterInterface(&hUsbDeviceFS, &USBD_AUDIO_fops_FS) != USBD_OK)
+
+  /* Add Interface callbacks for AUDIO Class */
+  if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_AUDIO, 0) != 0xFF)
   {
-    Error_Handler();
+    if (USBD_AUDIO_RegisterInterface(&hUsbDeviceFS, &USBD_AUDIO_fops_FS) != USBD_OK)
+    {
+      Error_Handler();
+    }
   }
 #endif
 #if USBD_CMPSIT_ACTIVATE_CDC == 1
@@ -99,18 +104,18 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
   
-  /* Add CDC Interface Class First Instance */
-  if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_CDC, 0) != 0xFF)
-  {
-    USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_CDC_Interface_fops_FS);
-  }
 //  if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC) != USBD_OK)
 //  {
 //    Error_Handler();
 //  }
-  if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_CDC_Interface_fops_FS) != USBD_OK)
+  
+  /* Add CDC Interface Class First Instance */
+  if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_CDC, 0) != 0xFF)
   {
-    Error_Handler();
+    if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_CDC_Interface_fops_FS) != USBD_OK)
+    {
+      Error_Handler();
+    }
   }
 #endif
 #if USBD_CMPSIT_ACTIVATE_DFU == 1
@@ -122,9 +127,14 @@ void MX_USB_DEVICE_Init(void)
 //  {
 //    Error_Handler();
 //  }
-  if (USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_fops_FS) != USBD_OK)
+
+  /* Add DFU Interface Class First Instance */
+  if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_DFU, 0) != 0xFF)
   {
-    Error_Handler();
+    if (USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_fops_FS) != USBD_OK)
+    {
+      Error_Handler();
+    }
   }
 #endif
   if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
