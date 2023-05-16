@@ -24,10 +24,7 @@
 #include "usbd_def.h"
 #include "usbd_core.h"
 
-#include "usbd_composite_builder.h"
-//#include "usbd_cdc.h"
-//#include "usbd_dfu.h"
-//#include "usbd_audio.h"
+#include "usbd_dfu.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -348,20 +345,8 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   hpcd_USB_OTG_FS.pData = pdev;
   pdev->pData = &hpcd_USB_OTG_FS;
 
-//  HAL_PCDEx_SetRxFiFoInBytes(&hpcd_USB_OTG_FS, 512); // ALL OUT EP Buffer 0x80
-//  HAL_PCDEx_SetTxFiFoInBytes(&hpcd_USB_OTG_FS, 0, 64); // EP0 IN 0x10
-//  
-//  #if (USBD_CMPSIT_ACTIVATE_AUDIO == 1)
-//  #endif
-//  #if (USBD_CMPSIT_ACTIVATE_DFU == 1)
-//  #endif
-//  #if (USBD_CMPSIT_ACTIVATE_CDC == 1)
-//    HAL_PCDEx_SetTxFiFoInBytes(&hpcd_USB_OTG_FS, (CDC_IN_EP & 0x7F), 128); // 0x20
-//    HAL_PCDEx_SetTxFiFoInBytes(&hpcd_USB_OTG_FS, (CDC_CMD_EP & 0x7F), 64); // 0x10
-//  #endif
-//  
   hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
-  hpcd_USB_OTG_FS.Init.dev_endpoints = 4; // TODO: check this number
+  hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
   hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
   hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
   hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
@@ -390,12 +375,9 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCD_RegisterIsoOutIncpltCallback(&hpcd_USB_OTG_FS, PCD_ISOOUTIncompleteCallback);
   HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_OTG_FS, PCD_ISOINIncompleteCallback);
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
-  // TODO: check if more are needed
   HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_FS, 0x80);
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 0, 0x40);
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 1, 0x80);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 2, 0x40);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 3, 0x80);
   }
   return USBD_OK;
 }
@@ -655,9 +637,7 @@ USBD_StatusTypeDef USBD_LL_SetTestMode(USBD_HandleTypeDef *pdev, uint8_t testmod
   */
 void *USBD_static_malloc(uint32_t size)
 {
-  static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
-  //static uint32_t mem[(sizeof(USBD_DFU_HandleTypeDef)/4)+1];/* On 32-bit boundary */
-  //static uint32_t mem[(sizeof(USBD_AUDIO_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+  static uint32_t mem[(sizeof(USBD_DFU_HandleTypeDef)/4)+1];/* On 32-bit boundary */
   return mem;
 }
 
