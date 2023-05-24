@@ -262,7 +262,7 @@ static int8_t AUDIO_GetState_FS(void)
   * @brief  Manages the DMA full transfer complete event.
   * @retval None
   */
-void TransferComplete_CallBack_FS(void)
+void AUDIO_TransferComplete_CallBack_FS(void)
 {
   /* USER CODE BEGIN 7 */
   USBD_AUDIO_Sync(&hUsbDeviceFS, AUDIO_OFFSET_FULL);
@@ -274,7 +274,7 @@ void TransferComplete_CallBack_FS(void)
   * @brief  Manages the DMA Half transfer complete event.
   * @retval None
   */
-void HalfTransfer_CallBack_FS(void)
+void AUDIO_HalfTransfer_CallBack_FS(void)
 {
   /* USER CODE BEGIN 8 */
   USBD_AUDIO_Sync(&hUsbDeviceFS, AUDIO_OFFSET_HALF);

@@ -1,0 +1,428 @@
+/**
+  ******************************************************************************
+  * @file    usbd_midi.h
+  * @author  MCD Application Team
+  * @brief   header file for the usbd_midi.c file.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2015 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __USB_MIDI_H
+#define __USB_MIDI_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+#include  "usbd_ioreq.h"
+
+/** @addtogroup STM32_USB_DEVICE_LIBRARY
+  * @{
+  */
+
+/** @defgroup USBD_MIDI
+  * @brief This file is the Header file for usbd_midi.c
+  * @{
+  */
+
+
+/** @defgroup USBD_MIDI_Exported_Defines
+  * @{
+  */
+#define MIDI_EPIN_ADDR                 0x81
+#define MIDI_EPIN_SIZE                 0x40
+
+#define MIDI_EPOUT_ADDR                0x01
+#define MIDI_EPOUT_SIZE                0x40
+
+#define USB_MIDI_CLASS_DESC_SHIFT      18
+#define USB_MIDI_DESC_SIZE             7
+#define USB_MIDI_REPORT_DESC_SIZE      (MIDI_IN_PORTS_NUM * 16 + MIDI_OUT_PORTS_NUM * 16 + 33)
+#define USB_MIDI_CONFIG_DESC_SIZE      (USB_MIDI_REPORT_DESC_SIZE + USB_MIDI_CLASS_DESC_SHIFT)
+
+#define MIDI_DESCRIPTOR_TYPE           0x21
+  
+#define MIDI_REQ_SET_PROTOCOL          0x0B
+#define MIDI_REQ_GET_PROTOCOL          0x03
+
+#define MIDI_REQ_SET_IDLE              0x0A
+#define MIDI_REQ_GET_IDLE              0x02
+
+#define MIDI_REQ_SET_REPORT            0x09
+#define MIDI_REQ_GET_REPORT            0x01
+
+#define MIDI_JACK_1    0x01
+#define MIDI_JACK_2    0x02
+#define MIDI_JACK_3    0x03
+#define MIDI_JACK_4    0x04
+#define MIDI_JACK_5    0x05
+#define MIDI_JACK_6    0x06
+#define MIDI_JACK_7    0x07
+#define MIDI_JACK_8    0x08
+#define MIDI_JACK_9    0x09
+#define MIDI_JACK_10    0x0a
+#define MIDI_JACK_11    0x0b
+#define MIDI_JACK_12    0x0c
+#define MIDI_JACK_13    0x0d
+#define MIDI_JACK_14    0x0e
+#define MIDI_JACK_15    0x0f
+#define MIDI_JACK_16    0x10
+#define MIDI_JACK_17    0x11
+#define MIDI_JACK_18    0x12
+#define MIDI_JACK_19    0x13
+#define MIDI_JACK_20    0x14
+#define MIDI_JACK_21    0x15
+#define MIDI_JACK_22    0x16
+#define MIDI_JACK_23    0x17
+#define MIDI_JACK_24    0x18
+#define MIDI_JACK_25    0x19
+#define MIDI_JACK_26    0x1a
+#define MIDI_JACK_27    0x1b
+#define MIDI_JACK_28    0x1c
+#define MIDI_JACK_29    0x1d
+#define MIDI_JACK_30    0x1e
+#define MIDI_JACK_31    0x1f
+#define MIDI_JACK_32    0x20
+#define MIDI_JACK_33    0x21
+#define MIDI_JACK_34    0x22
+#define MIDI_JACK_35    0x23
+#define MIDI_JACK_36    0x24
+#define MIDI_JACK_37    0x25
+#define MIDI_JACK_38    0x26
+#define MIDI_JACK_39    0x27
+#define MIDI_JACK_40    0x28
+#define MIDI_JACK_41    0x29
+#define MIDI_JACK_42    0x2a
+#define MIDI_JACK_43    0x2b
+#define MIDI_JACK_44    0x2c
+#define MIDI_JACK_45    0x2d
+#define MIDI_JACK_46    0x2e
+#define MIDI_JACK_47    0x2f
+#define MIDI_JACK_48    0x30
+#define MIDI_JACK_49    0x31
+#define MIDI_JACK_50    0x32
+#define MIDI_JACK_51    0x33
+#define MIDI_JACK_52    0x34
+#define MIDI_JACK_53    0x35
+#define MIDI_JACK_54    0x36
+#define MIDI_JACK_55    0x37
+#define MIDI_JACK_56    0x38
+#define MIDI_JACK_57    0x39
+#define MIDI_JACK_58    0x3a
+#define MIDI_JACK_59    0x3b
+#define MIDI_JACK_60    0x3c
+#define MIDI_JACK_61    0x3d
+#define MIDI_JACK_62    0x3e
+#define MIDI_JACK_63    0x3f
+#define MIDI_JACK_64    0x40
+
+#ifndef USBD_MAX_NUM_INTERFACES
+#define USBD_MAX_NUM_INTERFACES                       1U
+#endif /* USBD_MIDI_FREQ */
+
+#ifndef MIDI_HS_BINTERVAL
+#define MIDI_HS_BINTERVAL                            0x01U
+#endif /* MIDI_HS_BINTERVAL */
+
+#ifndef MIDI_FS_BINTERVAL
+#define MIDI_FS_BINTERVAL                            0x01U
+#endif /* MIDI_FS_BINTERVAL */
+
+#ifndef MIDI_IN_EP
+#define MIDI_IN_EP                                  0x81U
+#endif /* MIDI_IN_EP */
+
+#ifndef MIDI_OUT_EP
+#define MIDI_OUT_EP                                  0x01U
+#endif /* MIDI_OUT_EP */
+
+#define USB_MIDI_CONFIG_DESC_SIZ                     0x6DU
+#define MIDI_INTERFACE_DESC_SIZE                     0x09U
+//#define USB_MIDI_DESC_SIZ                            0x09U
+#define MIDI_STANDARD_ENDPOINT_DESC_SIZE             0x09U
+#define MIDI_STREAMING_ENDPOINT_DESC_SIZE            0x07U
+
+//#define MIDI_DESCRIPTOR_TYPE                         0x21U
+#define USB_DEVICE_CLASS_MIDI                        0x01U
+#define MIDI_SUBCLASS_MIDICONTROL                   0x01U
+#define MIDI_SUBCLASS_MIDISTREAMING                 0x02U
+#define MIDI_PROTOCOL_UNDEFINED                      0x00U
+#define MIDI_STREAMING_GENERAL                       0x01U
+#define MIDI_STREAMING_FORMAT_TYPE                   0x02U
+
+/* Midi Descriptor Types */
+#define MIDI_INTERFACE_DESCRIPTOR_TYPE               0x24U
+#define MIDI_ENDPOINT_DESCRIPTOR_TYPE                0x25U
+
+/* Midi Control Interface Descriptor Subtypes */
+#define MIDI_CONTROL_HEADER                          0x01U
+#define MIDI_CONTROL_INPUT_TERMINAL                  0x02U
+#define MIDI_CONTROL_OUTPUT_TERMINAL                 0x03U
+#define MIDI_CONTROL_FEATURE_UNIT                    0x06U
+
+#define MIDI_INPUT_TERMINAL_DESC_SIZE                0x0CU
+#define MIDI_OUTPUT_TERMINAL_DESC_SIZE               0x09U
+#define MIDI_STREAMING_INTERFACE_DESC_SIZE           0x07U
+
+#define MIDI_CONTROL_MUTE                            0x0001U
+
+#define MIDI_FORMAT_TYPE_I                           0x01U
+#define MIDI_FORMAT_TYPE_III                         0x03U
+
+#define MIDI_ENDPOINT_GENERAL                        0x01U
+
+#define MIDI_REQ_GET_CUR                             0x81U
+#define MIDI_REQ_SET_CUR                             0x01U
+
+#define MIDI_OUT_STREAMING_CTRL                      0x02U
+
+#define MIDI_OUT_TC                                  0x01U
+#define MIDI_IN_TC                                   0x02U
+
+//#define MIDI_IN_PACKET_SIZE                          0x40
+//#define MIDI_OUT_PACKET_SIZE                         0x40
+#define MIDI_DEFAULT_VOLUME                          70U
+
+/* Number of sub-packets in the midi transfer buffer. You can modify this value but always make sure
+  that it is an even number and higher than 3 */
+#define MIDI_OUT_PACKET_NUM                          80U
+/* Total size of the midi transfer buffer */
+#define MIDI_TOTAL_BUF_SIZE                          ((uint16_t)(MIDI_OUT_PACKET_SIZE * MIDI_OUT_PACKET_NUM))
+
+/* Midi Commands enumeration */
+typedef enum
+{
+  MIDI_CMD_START = 1,
+  MIDI_CMD_PLAY,
+  MIDI_CMD_STOP,
+} MIDI_CMD_TypeDef;
+
+
+typedef enum
+{
+  MIDI_OFFSET_NONE = 0,
+  MIDI_OFFSET_HALF,
+  MIDI_OFFSET_FULL,
+  MIDI_OFFSET_UNKNOWN,
+} MIDI_OffsetTypeDef;
+/**
+  * @}
+  */
+
+
+/** @defgroup USBD_CORE_Exported_TypesDefinitions
+  * @{
+  */
+typedef struct
+{
+  uint8_t cmd;
+  uint8_t data[USB_MAX_EP0_SIZE];
+  uint8_t len;
+  uint8_t unit;
+} USBD_MIDI_ControlTypeDef;
+
+typedef enum
+{
+  MIDI_IDLE = 0,
+  MIDI_BUSY,
+}
+MIDI_StateTypeDef; 
+
+typedef struct
+{
+  /*uint32_t alt_setting;
+  uint8_t buffer[MIDI_TOTAL_BUF_SIZE];
+  MIDI_OffsetTypeDef offset;
+  uint8_t rd_enable;
+  uint16_t rd_ptr;
+  uint16_t wr_ptr;
+  USBD_MIDI_ControlTypeDef control;*/
+  uint32_t             Protocol;   
+  uint32_t             IdleState;  
+  uint32_t             AltSetting;
+  MIDI_StateTypeDef     state;
+} USBD_MIDI_HandleTypeDef;
+
+
+typedef struct
+{
+  int8_t (*Init)(uint32_t MidiFreq, uint32_t Volume, uint32_t options);
+  int8_t (*DeInit)(uint32_t options);
+  int8_t (*Receive)(uint8_t *Buf, uint32_t *Len);
+  int8_t (*TransmitCplt)(uint8_t *Buf, uint32_t *Len, uint8_t epnum);
+} USBD_MIDI_ItfTypeDef;
+
+/*
+ * Midi Class specification release 1.0
+ */
+
+/* Table 4-2: Class-Specific AC Interface Header Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint16_t          bcdADC;
+  uint16_t          wTotalLength;
+  uint8_t           bInCollection;
+  uint8_t           baInterfaceNr;
+} __PACKED USBD_SpeakerIfDescTypeDef;
+
+/* Table 4-3: Input Terminal Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint8_t           bTerminalID;
+  uint16_t          wTerminalType;
+  uint8_t           bAssocTerminal;
+  uint8_t           bNrChannels;
+  uint16_t          wChannelConfig;
+  uint8_t           iChannelNames;
+  uint8_t           iTerminal;
+} __PACKED USBD_SpeakerInDescTypeDef;
+
+/* USB Speaker Midi Feature Unit Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint8_t           bUnitID;
+  uint8_t           bSourceID;
+  uint8_t           bControlSize;
+  uint16_t          bmaControls;
+  uint8_t           iTerminal;
+} __PACKED USBD_SpeakerFeatureDescTypeDef;
+
+/* Table 4-4: Output Terminal Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint8_t           bTerminalID;
+  uint16_t          wTerminalType;
+  uint8_t           bAssocTerminal;
+  uint8_t           bSourceID;
+  uint8_t           iTerminal;
+} __PACKED USBD_SpeakerOutDescTypeDef;
+
+/* Table 4-19: Class-Specific AS Interface Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint8_t           bTerminalLink;
+  uint8_t           bDelay;
+  uint16_t          wFormatTag;
+} __PACKED USBD_SpeakerStreamIfDescTypeDef;
+
+/* USB Speaker Midi Type III Format Interface Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptorSubtype;
+  uint8_t           bFormatType;
+  uint8_t           bNrChannels;
+  uint8_t           bSubFrameSize;
+  uint8_t           bBitResolution;
+  uint8_t           bSamFreqType;
+  uint8_t           tSamFreq2;
+  uint8_t           tSamFreq1;
+  uint8_t           tSamFreq0;
+} USBD_SpeakerIIIFormatIfDescTypeDef;
+
+/* Table 4-17: Standard AC Interrupt Endpoint Descriptor */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bEndpointAddress;
+  uint8_t           bmAttributes;
+  uint16_t          wMaxPacketSize;
+  uint8_t           bInterval;
+  uint8_t           bRefresh;
+  uint8_t           bSynchAddress;
+} __PACKED USBD_SpeakerEndDescTypeDef;
+
+/* Table 4-21: Class-Specific AS Isochronous Midi Data Endpoint Descriptor        */
+typedef struct
+{
+  uint8_t           bLength;
+  uint8_t           bDescriptorType;
+  uint8_t           bDescriptor;
+  uint8_t           bmAttributes;
+  uint8_t           bLockDelayUnits;
+  uint16_t          wLockDelay;
+} __PACKED USBD_SpeakerEndStDescTypeDef;
+
+/**
+  * @}
+  */
+
+
+
+/** @defgroup USBD_CORE_Exported_Macros
+  * @{
+  */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_CORE_Exported_Variables
+  * @{
+  */
+
+extern USBD_ClassTypeDef USBD_MIDI;
+#define USBD_MIDI_CLASS &USBD_MIDI
+
+extern void USBD_MIDI_DataInHandler(uint8_t * usb_rx_buffer, uint8_t usb_rx_buffer_length);
+
+/**
+  * @}
+  */
+
+/** @defgroup USB_CORE_Exported_Functions
+  * @{
+  */
+uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev,
+                                     USBD_MIDI_ItfTypeDef *fops);
+
+//void USBD_MIDI_Sync(USBD_HandleTypeDef *pdev, MIDI_OffsetTypeDef offset);
+
+#ifdef USE_USBD_COMPOSITE
+uint32_t USBD_MIDI_GetEpPcktSze(USBD_HandleTypeDef *pdev, uint8_t If, uint8_t Ep);
+#endif /* USE_USBD_COMPOSITE */
+
+/**
+  * @}
+  */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* __USB_MIDI_H */
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
