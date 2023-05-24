@@ -26,24 +26,6 @@
   *           This driver implements the following aspects of the specification:
   *             - Device descriptor management
   *             - Configuration descriptor management
-  *             - Standard AC Interface Descriptor management
-  *             - 1 Midi Streaming Interface (with single channel, PCM, Stereo mode)
-  *             - 1 Midi Streaming Endpoint
-  *             - 1 Midi Terminal Input (1 channel)
-  *             - Midi Class-Specific AC Interfaces
-  *             - Midi Class-Specific AS Interfaces
-  *             - MidiControl Requests: only SET_CUR and GET_CUR requests are supported (for Mute)
-  *             - Midi Feature Unit (limited to Mute control)
-  *             - Midi Synchronization type: Asynchronous
-  *             - Single fixed midi sampling rate (configurable in usbd_conf.h file)
-  *          The current midi class version supports the following midi features:
-  *             - Pulse Coded Modulation (PCM) format
-  *             - sampling rate: 48KHz.
-  *             - Bit resolution: 16
-  *             - Number of channels: 2
-  *             - No volume control
-  *             - Mute/Unmute capability
-  *             - Asynchronous Endpoints
   *
   * @note     In HS mode and when the DMA is used, all variables and data structures
   *           dealing with the DMA during the transaction process should be 32-bit aligned.
@@ -93,15 +75,7 @@ EndBSPDependencies */
 /** @defgroup USBD_MIDI_Private_Macros
   * @{
   */
-#define MIDI_SAMPLE_FREQ(frq) \
-  (uint8_t)(frq), (uint8_t)((frq >> 8)), (uint8_t)((frq >> 16))
 
-#define MIDI_PACKET_SZE(frq) \
-  (uint8_t)(((frq * 2U * 2U) / 1000U) & 0xFFU), (uint8_t)((((frq * 2U * 2U) / 1000U) >> 8) & 0xFFU)
-
-#ifdef USE_USBD_COMPOSITE
-#define MIDI_PACKET_SZE_WORD(frq)     (uint32_t)((((frq) * 2U * 2U)/1000U))
-#endif /* USE_USBD_COMPOSITE  */
 /**
   * @}
   */
@@ -121,15 +95,6 @@ static uint8_t *USBD_MIDI_GetDeviceQualifierDesc(uint16_t *length);
 #endif /* USE_USBD_COMPOSITE  */
 static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_MIDI_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
-//static uint8_t USBD_MIDI_EP0_RxReady(USBD_HandleTypeDef *pdev);
-//static uint8_t USBD_MIDI_EP0_TxReady(USBD_HandleTypeDef *pdev);
-//static uint8_t USBD_MIDI_SOF(USBD_HandleTypeDef *pdev);
-
-//static uint8_t USBD_MIDI_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
-//static uint8_t USBD_MIDI_IsoOutIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
-//static void MIDI_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
-//static void MIDI_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
-//static void *USBD_MIDI_GetMidiHeaderDesc(uint8_t *pConfDesc);
 
 /**
   * @}
@@ -168,7 +133,7 @@ USBD_ClassTypeDef USBD_MIDI =
 
 #ifndef USE_USBD_COMPOSITE
 /* USB MIDI device Configuration Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN_END =
+__ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIGN_END =
 {
   /* Configuration 1 */
   0x09,                                 /* bLength */
@@ -179,7 +144,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN
   0x01,                                 /* bConfigurationValue */
   0x00,                                 /* iConfiguration */
 #if (USBD_SELF_POWERED == 1U)
-  0xC0,                                 /* bmAttributes: Bus Powered according to user configuration */
+  0xC0,                                 /* bmAttributes: Self Powered according to user configuration */
 #else
   0x80,                                 /* bmAttributes: Bus Powered according to user configuration */
 #endif /* USBD_SELF_POWERED */
@@ -187,15 +152,15 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN
   /* 09 byte*/
 
   /************** MIDI Adapter Standard MS Interface Descriptor ****************/
-  0x09,                   /*bLength: Interface Descriptor size*/
-  USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
-  0x00,                   /*bInterfaceNumber: Index of this interface.*/
-  0x00,                   /*bAlternateSetting: Alternate setting*/
-  0x02,                   /*bNumEndpoints*/
-  0x01,                   /*bInterfaceClass: AUDIO*/
-  0x03,                   /*bInterfaceSubClass : MIDISTREAMING*/
-  0x00,                   /*nInterfaceProtocol : Unused*/
-  0x00,                   /*iInterface: Unused*/
+  0x09,                         /*bLength: Interface Descriptor size*/
+  USB_DESC_TYPE_INTERFACE,      /*bDescriptorType: Interface descriptor type*/
+  0x00,                         /*bInterfaceNumber: Index of this interface.*/
+  0x00,                         /*bAlternateSetting: Alternate setting*/
+  0x02,                         /*bNumEndpoints*/
+  USB_DEVICE_CLASS_AUDIO,       /*bInterfaceClass: AUDIO*/
+  AUDIO_SUBCLASS_MIDISTREAMING, /*bInterfaceSubClass : MIDISTREAMING*/
+  0x00,                         /*nInterfaceProtocol : Unused*/
+  0x00,                         /*iInterface: 0*/
 
   /******************** MIDI Adapter Class-specific MS Interface Descriptor ********************/
   /* USB_MIDI_CLASS_DESC_SHIFT */
@@ -546,7 +511,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN
   /******************** MIDI Adapter Standard Bulk OUT Endpoint Descriptor ********************/
   0x09,                   /*bLength: Size of this descriptor, in bytes*/
   USB_DESC_TYPE_ENDPOINT, /*bDescriptorType: ENDPOINT descriptor.*/
-  MIDI_EPOUT_ADDR,        /*bEndpointAddress: OUT Endpoint 1.*/
+  MIDI_OUT_EP,            /*bEndpointAddress: OUT Endpoint 1.*/
   0x02,                   /*bmAttributes: Bulk, not shared.*/
   MIDI_EPOUT_SIZE, 
   0x00,                   /*wMaxPacketSize*/
@@ -587,7 +552,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN
   /******************** MIDI Adapter Standard Bulk IN Endpoint Descriptor ********************/
   0x09,                    /*bLength: Size of this descriptor, in bytes*/
   USB_DESC_TYPE_ENDPOINT,  /*bDescriptorType: ENDPOINT descriptor.*/
-  MIDI_EPIN_ADDR,          /*bEndpointAddress: IN Endpoint 1.*/
+  MIDI_IN_EP,          /*bEndpointAddress: IN Endpoint 1.*/
   0x02,                    /*bmAttributes: Bulk, not shared.*/
   MIDI_EPIN_SIZE, 
   0x00,                    /*wMaxPacketSize*/
@@ -625,137 +590,6 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN
   MIDI_JACK_16,            /*BaAssocJackID(8): ID of the Embedded MIDI OUT Jack.*/
 #endif
 
-//  /* USB Speaker Standard interface descriptor */
-//  MIDI_INTERFACE_DESC_SIZE,            /* bLength */
-//  USB_DESC_TYPE_INTERFACE,              /* bDescriptorType */
-//  0x00,                                 /* bInterfaceNumber */
-//  0x00,                                 /* bAlternateSetting */
-//  0x00,                                 /* bNumEndpoints */
-//  USB_DEVICE_CLASS_MIDI,               /* bInterfaceClass */
-//  MIDI_SUBCLASS_MIDICONTROL,          /* bInterfaceSubClass */
-//  MIDI_PROTOCOL_UNDEFINED,             /* bInterfaceProtocol */
-//  0x00,                                 /* iInterface */
-//  /* 09 byte*/
-//
-//  /* USB Speaker Class-specific AC Interface Descriptor */
-//  MIDI_INTERFACE_DESC_SIZE,            /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_CONTROL_HEADER,                 /* bDescriptorSubtype */
-//  0x00,          /* 1.00 */             /* bcdADC */
-//  0x01,
-//  0x27,                                 /* wTotalLength */
-//  0x00,
-//  0x01,                                 /* bInCollection */
-//  0x01,                                 /* baInterfaceNr */
-//  /* 09 byte*/
-//
-//  /* USB Speaker Input Terminal Descriptor */
-//  MIDI_INPUT_TERMINAL_DESC_SIZE,       /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_CONTROL_INPUT_TERMINAL,         /* bDescriptorSubtype */
-//  0x01,                                 /* bTerminalID */
-//  0x01,                                 /* wTerminalType MIDI_TERMINAL_USB_STREAMING   0x0101 */
-//  0x01,
-//  0x00,                                 /* bAssocTerminal */
-//  0x01,                                 /* bNrChannels */
-//  0x00,                                 /* wChannelConfig 0x0000  Mono */
-//  0x00,
-//  0x00,                                 /* iChannelNames */
-//  0x00,                                 /* iTerminal */
-//  /* 12 byte*/
-//
-//  /* USB Speaker Midi Feature Unit Descriptor */
-//  0x09,                                 /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_CONTROL_FEATURE_UNIT,           /* bDescriptorSubtype */
-//  MIDI_OUT_STREAMING_CTRL,             /* bUnitID */
-//  0x01,                                 /* bSourceID */
-//  0x01,                                 /* bControlSize */
-//  MIDI_CONTROL_MUTE,                   /* bmaControls(0) */
-//  0,                                    /* bmaControls(1) */
-//  0x00,                                 /* iTerminal */
-//  /* 09 byte */
-//
-//  /* USB Speaker Output Terminal Descriptor */
-//  0x09,      /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_CONTROL_OUTPUT_TERMINAL,        /* bDescriptorSubtype */
-//  0x03,                                 /* bTerminalID */
-//  0x01,                                 /* wTerminalType  0x0301 */
-//  0x03,
-//  0x00,                                 /* bAssocTerminal */
-//  0x02,                                 /* bSourceID */
-//  0x00,                                 /* iTerminal */
-//  /* 09 byte */
-//
-//  /* USB Speaker Standard AS Interface Descriptor - Midi Streaming Zero Bandwidth */
-//  /* Interface 1, Alternate Setting 0                                              */
-//  MIDI_INTERFACE_DESC_SIZE,            /* bLength */
-//  USB_DESC_TYPE_INTERFACE,              /* bDescriptorType */
-//  0x01,                                 /* bInterfaceNumber */
-//  0x00,                                 /* bAlternateSetting */
-//  0x00,                                 /* bNumEndpoints */
-//  USB_DEVICE_CLASS_MIDI,               /* bInterfaceClass */
-//  MIDI_SUBCLASS_MIDISTREAMING,        /* bInterfaceSubClass */
-//  MIDI_PROTOCOL_UNDEFINED,             /* bInterfaceProtocol */
-//  0x00,                                 /* iInterface */
-//  /* 09 byte*/
-//
-//  /* USB Speaker Standard AS Interface Descriptor - Midi Streaming Operational */
-//  /* Interface 1, Alternate Setting 1                                           */
-//  MIDI_INTERFACE_DESC_SIZE,            /* bLength */
-//  USB_DESC_TYPE_INTERFACE,              /* bDescriptorType */
-//  0x01,                                 /* bInterfaceNumber */
-//  0x01,                                 /* bAlternateSetting */
-//  0x01,                                 /* bNumEndpoints */
-//  USB_DEVICE_CLASS_MIDI,               /* bInterfaceClass */
-//  MIDI_SUBCLASS_MIDISTREAMING,        /* bInterfaceSubClass */
-//  MIDI_PROTOCOL_UNDEFINED,             /* bInterfaceProtocol */
-//  0x00,                                 /* iInterface */
-//  /* 09 byte*/
-//
-//  /* USB Speaker Midi Streaming Interface Descriptor */
-//  MIDI_STREAMING_INTERFACE_DESC_SIZE,  /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_STREAMING_GENERAL,              /* bDescriptorSubtype */
-//  0x01,                                 /* bTerminalLink */
-//  0x01,                                 /* bDelay */
-//  0x01,                                 /* wFormatTag MIDI_FORMAT_PCM  0x0001 */
-//  0x00,
-//  /* 07 byte*/
-//
-//  /* USB Speaker Midi Type III Format Interface Descriptor */
-//  0x0B,                                 /* bLength */
-//  MIDI_INTERFACE_DESCRIPTOR_TYPE,      /* bDescriptorType */
-//  MIDI_STREAMING_FORMAT_TYPE,          /* bDescriptorSubtype */
-//  MIDI_FORMAT_TYPE_I,                  /* bFormatType */
-//  0x02,                                 /* bNrChannels */
-//  0x02,                                 /* bSubFrameSize :  2 Bytes per frame (16bits) */
-//  16,                                   /* bBitResolution (16-bits per sample) */
-//  0x01,                                 /* bSamFreqType only one frequency supported */
-//  MIDI_SAMPLE_FREQ(USBD_MIDI_FREQ),   /* Midi sampling frequency coded on 3 bytes */
-//  /* 11 byte*/
-//
-//  /* Endpoint 1 - Standard Descriptor */
-//  MIDI_STANDARD_ENDPOINT_DESC_SIZE,    /* bLength */
-//  USB_DESC_TYPE_ENDPOINT,               /* bDescriptorType */
-//  MIDI_OUT_EP,                         /* bEndpointAddress 1 out endpoint */
-//  USBD_EP_TYPE_ISOC,                    /* bmAttributes */
-//  MIDI_PACKET_SZE(USBD_MIDI_FREQ),    /* wMaxPacketSize in Bytes (Freq(Samples)*2(Stereo)*2(HalfWord)) */
-//  MIDI_FS_BINTERVAL,                   /* bInterval */
-//  0x00,                                 /* bRefresh */
-//  0x00,                                 /* bSynchAddress */
-//  /* 09 byte*/
-//
-//  /* Endpoint - Midi Streaming Descriptor */
-//  MIDI_STREAMING_ENDPOINT_DESC_SIZE,   /* bLength */
-//  MIDI_ENDPOINT_DESCRIPTOR_TYPE,       /* bDescriptorType */
-//  MIDI_ENDPOINT_GENERAL,               /* bDescriptor */
-//  0x00,                                 /* bmAttributes */
-//  0x00,                                 /* bLockDelayUnits */
-//  0x00,                                 /* wLockDelay */
-//  0x00,
-//  /* 07 byte*/
 } ;
 
 /* USB Standard Device Descriptor */
@@ -774,8 +608,9 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER
 };
 #endif /* USE_USBD_COMPOSITE  */
 
-static uint8_t MIDIInEpAdd = MIDI_IN_EP;
+static uint8_t MIDIInEpAdd  = MIDI_IN_EP;
 static uint8_t MIDIOutEpAdd = MIDI_OUT_EP;
+
 /**
   * @}
   */
@@ -1072,17 +907,62 @@ uint8_t USBD_MIDI_SendReport(USBD_HandleTypeDef  *pdev,
                                  uint8_t *report,
                                  uint16_t len)
 {
-  USBD_MIDI_HandleTypeDef *hmidi = pdev->pClassData;
+  //USBD_MIDI_HandleTypeDef *hmidi = pdev->pClassData;
+  USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
   
+#ifdef USE_USBD_COMPOSITE
+  /* Get the Endpoints addresses allocated for this class instance */
+  MIDIInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK);
+#endif /* USE_USBD_COMPOSITE */
+
   if (pdev->dev_state == USBD_STATE_CONFIGURED)
   {
     if(hmidi->state == MIDI_IDLE)
     {
       hmidi->state = MIDI_BUSY;
-      USBD_LL_Transmit (pdev, MIDI_EPIN_ADDR, report, len);
+      USBD_LL_Transmit(pdev, MIDIInEpAdd, report, len);
     }
   }
   return USBD_OK;
+}
+
+/**
+  * @brief  USBD_CDC_TransmitPacket
+  *         Transmit packet on IN endpoint
+  * @param  pdev: device instance
+  * @retval status
+  */
+uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
+{
+  USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  USBD_StatusTypeDef ret = USBD_BUSY;
+
+#ifdef USE_USBD_COMPOSITE
+  /* Get the Endpoints addresses allocated for this class instance */
+  MIDIInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK);
+#endif /* USE_USBD_COMPOSITE */
+  if (pdev->pClassDataCmsit[pdev->classId] == NULL)
+  {
+    return (uint8_t)USBD_FAIL;
+  }
+
+  if (hmidi->state == MIDI_IDLE)
+  {
+    /* Tx Transfer in progress */
+    hmidi->state = MIDI_BUSY;
+
+    /* Update the packet total length */
+    //pdev->ep_in[MIDIInEpAdd & 0xFU].total_length = hmidi->TxLength;
+    pdev->ep_in[MIDIInEpAdd & 0xFU].total_length = MIDI_EPOUT_SIZE;
+
+    /* Transmit next packet */
+    //(void)USBD_LL_Transmit(pdev, MIDIInEpAdd, hmidi->TxBuffer, hmidi->TxLength);
+    (void)USBD_LL_Transmit(pdev, MIDIInEpAdd, usb_rx_buffer, MIDI_EPOUT_SIZE);
+
+    ret = USBD_OK;
+  }
+
+  return (uint8_t)ret;
 }
 
 

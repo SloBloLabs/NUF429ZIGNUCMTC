@@ -40,10 +40,10 @@ extern "C" {
 /** @defgroup USBD_MIDI_Exported_Defines
   * @{
   */
-#define MIDI_EPIN_ADDR                 0x81
+//#define MIDI_EPIN_ADDR                 0x81
 #define MIDI_EPIN_SIZE                 0x40
 
-#define MIDI_EPOUT_ADDR                0x01
+//#define MIDI_EPOUT_ADDR                0x01
 #define MIDI_EPOUT_SIZE                0x40
 
 #define USB_MIDI_CLASS_DESC_SHIFT      18
@@ -147,75 +147,9 @@ extern "C" {
 #define MIDI_OUT_EP                                  0x01U
 #endif /* MIDI_OUT_EP */
 
-#define USB_MIDI_CONFIG_DESC_SIZ                     0x6DU
-#define MIDI_INTERFACE_DESC_SIZE                     0x09U
-//#define USB_MIDI_DESC_SIZ                            0x09U
-#define MIDI_STANDARD_ENDPOINT_DESC_SIZE             0x09U
-#define MIDI_STREAMING_ENDPOINT_DESC_SIZE            0x07U
+#define USB_DEVICE_CLASS_AUDIO                       0x01U
+#define AUDIO_SUBCLASS_MIDISTREAMING                 0x03U
 
-//#define MIDI_DESCRIPTOR_TYPE                         0x21U
-#define USB_DEVICE_CLASS_MIDI                        0x01U
-#define MIDI_SUBCLASS_MIDICONTROL                   0x01U
-#define MIDI_SUBCLASS_MIDISTREAMING                 0x02U
-#define MIDI_PROTOCOL_UNDEFINED                      0x00U
-#define MIDI_STREAMING_GENERAL                       0x01U
-#define MIDI_STREAMING_FORMAT_TYPE                   0x02U
-
-/* Midi Descriptor Types */
-#define MIDI_INTERFACE_DESCRIPTOR_TYPE               0x24U
-#define MIDI_ENDPOINT_DESCRIPTOR_TYPE                0x25U
-
-/* Midi Control Interface Descriptor Subtypes */
-#define MIDI_CONTROL_HEADER                          0x01U
-#define MIDI_CONTROL_INPUT_TERMINAL                  0x02U
-#define MIDI_CONTROL_OUTPUT_TERMINAL                 0x03U
-#define MIDI_CONTROL_FEATURE_UNIT                    0x06U
-
-#define MIDI_INPUT_TERMINAL_DESC_SIZE                0x0CU
-#define MIDI_OUTPUT_TERMINAL_DESC_SIZE               0x09U
-#define MIDI_STREAMING_INTERFACE_DESC_SIZE           0x07U
-
-#define MIDI_CONTROL_MUTE                            0x0001U
-
-#define MIDI_FORMAT_TYPE_I                           0x01U
-#define MIDI_FORMAT_TYPE_III                         0x03U
-
-#define MIDI_ENDPOINT_GENERAL                        0x01U
-
-#define MIDI_REQ_GET_CUR                             0x81U
-#define MIDI_REQ_SET_CUR                             0x01U
-
-#define MIDI_OUT_STREAMING_CTRL                      0x02U
-
-#define MIDI_OUT_TC                                  0x01U
-#define MIDI_IN_TC                                   0x02U
-
-//#define MIDI_IN_PACKET_SIZE                          0x40
-//#define MIDI_OUT_PACKET_SIZE                         0x40
-#define MIDI_DEFAULT_VOLUME                          70U
-
-/* Number of sub-packets in the midi transfer buffer. You can modify this value but always make sure
-  that it is an even number and higher than 3 */
-#define MIDI_OUT_PACKET_NUM                          80U
-/* Total size of the midi transfer buffer */
-#define MIDI_TOTAL_BUF_SIZE                          ((uint16_t)(MIDI_OUT_PACKET_SIZE * MIDI_OUT_PACKET_NUM))
-
-/* Midi Commands enumeration */
-typedef enum
-{
-  MIDI_CMD_START = 1,
-  MIDI_CMD_PLAY,
-  MIDI_CMD_STOP,
-} MIDI_CMD_TypeDef;
-
-
-typedef enum
-{
-  MIDI_OFFSET_NONE = 0,
-  MIDI_OFFSET_HALF,
-  MIDI_OFFSET_FULL,
-  MIDI_OFFSET_UNKNOWN,
-} MIDI_OffsetTypeDef;
 /**
   * @}
   */
@@ -224,13 +158,13 @@ typedef enum
 /** @defgroup USBD_CORE_Exported_TypesDefinitions
   * @{
   */
-typedef struct
-{
-  uint8_t cmd;
-  uint8_t data[USB_MAX_EP0_SIZE];
-  uint8_t len;
-  uint8_t unit;
-} USBD_MIDI_ControlTypeDef;
+//typedef struct
+//{
+//  uint8_t cmd;
+//  uint8_t data[USB_MAX_EP0_SIZE];
+//  uint8_t len;
+//  uint8_t unit;
+//} USBD_MIDI_ControlTypeDef;
 
 typedef enum
 {
@@ -403,7 +337,7 @@ extern void USBD_MIDI_DataInHandler(uint8_t * usb_rx_buffer, uint8_t usb_rx_buff
   */
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev,
                                      USBD_MIDI_ItfTypeDef *fops);
-
+uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev);
 //void USBD_MIDI_Sync(USBD_HandleTypeDef *pdev, MIDI_OffsetTypeDef offset);
 
 #ifdef USE_USBD_COMPOSITE
