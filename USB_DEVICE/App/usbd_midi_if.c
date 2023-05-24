@@ -88,7 +88,12 @@
   */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
+static uint8_t buffUsbReport[MIDI_EPIN_SIZE] = {0};
+static uint8_t buffUsbReportNextIndex = 0;
 
+static uint8_t buffUsb[MIDI_BUFFER_LENGTH] = {0};
+static volatile uint8_t buffUsbNextIndex = 0;
+static uint8_t buffUsbCurrIndex = 0;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -115,10 +120,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
   * @{
   */
 
-static int8_t MIDI_Init_FS(uint32_t MidiFreq, uint32_t Volume, uint32_t options);
-static int8_t MIDI_DeInit_FS(uint32_t options);
+static int8_t MIDI_Init_FS();
+static int8_t MIDI_DeInit_FS();
 static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t *Len);
-static int8_t MIDI_TransmitCplt_FS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -132,8 +136,7 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
 {
   MIDI_Init_FS,
   MIDI_DeInit_FS,
-  MIDI_Receive_FS,
-  MIDI_TransmitCplt_FS
+  MIDI_Receive_FS
 };
 
 /* Private functions ---------------------------------------------------------*/
@@ -144,12 +147,9 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
   * @param  options: Reserved for future use
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t MIDI_Init_FS(uint32_t MidiFreq, uint32_t Volume, uint32_t options)
+static int8_t MIDI_Init_FS()
 {
   /* USER CODE BEGIN 0 */
-  UNUSED(MidiFreq);
-  UNUSED(Volume);
-  UNUSED(options);
   printf("Midi Init\n");
   return (USBD_OK);
   /* USER CODE END 0 */
@@ -160,10 +160,9 @@ static int8_t MIDI_Init_FS(uint32_t MidiFreq, uint32_t Volume, uint32_t options)
   * @param  options: Reserved for future use
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t MIDI_DeInit_FS(uint32_t options)
+static int8_t MIDI_DeInit_FS()
 {
   /* USER CODE BEGIN 1 */
-  UNUSED(options);
   printf("Midi DeInit\n");
   return (USBD_OK);
   /* USER CODE END 1 */
@@ -210,56 +209,128 @@ static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE END 6 */
 }
 
-/**
-  * @brief  MIDI_Transmit_FS
-  *         Data to send over USB IN endpoint are sent over CDC interface
-  *         through this function.
-  *         @note
-  *
-  *
-  * @param  Buf: Buffer of data to be sent
-  * @param  Len: Number of data to be sent (in bytes)
-  * @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
-  */
-uint8_t MIDI_Transmit_FS(uint8_t* Buf, uint16_t Len)
+void USBD_MIDI_DataInHandler(uint8_t *usb_rx_buffer, uint8_t usb_rx_buffer_length)
 {
-  uint8_t result = USBD_OK;
-  /* USER CODE BEGIN 7 */
-  USBD_MIDI_HandleTypeDef *hcdc = (USBD_MIDI_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->state == MIDI_BUSY){
-    return USBD_BUSY;
+  printf("MidiIF: Handling Data, size=%d\n", usb_rx_buffer_length);
+  for(uint32_t i = 0; i < usb_rx_buffer_length; ++i) {
+    //printf("%d", usb_rx_buffer[i]);
+    printf("%0x", usb_rx_buffer[i] & 0xff);
   }
-  //USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
-  result = USBD_MIDI_TransmitPacket(&hUsbDeviceFS);
-  /* USER CODE END 7 */
-  return result;
-}
+  printf("\n");
 
-/**
-  * @brief  MIDI_TransmitCplt_FS
-  *         Data transmitted callback
-  *
-  *         @note
-  *         This function is IN transfer complete callback used to inform user that
-  *         the submitted Data is successfully sent over USB.
-  *
-  * @param  Buf: Buffer of data to be received
-  * @param  Len: Number of data received (in bytes)
-  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
-  */
-static int8_t MIDI_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
-{
-  uint8_t result = USBD_OK;
-  /* USER CODE BEGIN 13 */
-  UNUSED(Buf);
-  UNUSED(Len);
-  UNUSED(epnum);
-  /* USER CODE END 13 */
-  return result;
-}
+  while (usb_rx_buffer_length && *usb_rx_buffer != 0x00)
+  {
+    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
+    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
+    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
+    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
 
+    usb_rx_buffer_length -= 4;
+  }
+}
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
+bool MIDI_HasUSBData(void)
+{
+  return buffUsbCurrIndex != buffUsbNextIndex;
+}
+
+void MIDI_ProcessUSBData(void)
+{
+  static uint8_t lastMessagesBytePerCable[MIDI_CABLES_NUMBER] = {0};
+  uint8_t *pLastMessageByte;
+  uint8_t cable;
+  uint8_t messageByte;
+  uint8_t message;
+  uint8_t param1;
+  uint8_t param2;
+  void (*pSend)(uint8_t);
+
+  if (buffUsbCurrIndex == buffUsbNextIndex)
+    return;
+
+  cable = (buffUsb[buffUsbCurrIndex] >> 4);
+  messageByte = buffUsb[buffUsbCurrIndex + 1];
+
+  if (cable == 0)
+  {
+    pLastMessageByte = &lastMessagesBytePerCable[0];
+    //pSend = &UART1_Send;
+    printf("Send cable 1\n");
+  }
+  else if (cable == 1)
+  {
+    pLastMessageByte = &lastMessagesBytePerCable[1];
+    //pSend = &UART2_Send;
+    printf("Send cable 2\n");
+  }
+  else if (cable == 2)
+  {
+    pLastMessageByte = &lastMessagesBytePerCable[2];
+    //pSend = &UART3_Send;
+    printf("Send cable 3\n");
+  }
+  else
+  {
+    pSend = NULL;
+  }
+
+  if (pSend != NULL)
+  {
+    message = (messageByte >> 4);
+    param1 = buffUsb[buffUsbCurrIndex + 2];
+    param2 = buffUsb[buffUsbCurrIndex + 3];
+
+    if ((messageByte & MIDI_MASK_REAL_TIME_MESSAGE) == MIDI_MASK_REAL_TIME_MESSAGE)
+    {
+      pSend(messageByte);
+    }
+    else if (message == MIDI_MESSAGE_CHANNEL_PRESSURE ||
+             message == MIDI_MESSAGE_PROGRAM_CHANGE ||
+             messageByte == MIDI_MESSAGE_TIME_CODE_QTR_FRAME ||
+             messageByte == MIDI_MESSAGE_SONG_SELECT)
+    {
+      if (*pLastMessageByte != messageByte)
+      {
+        pSend(messageByte);
+        *pLastMessageByte = messageByte;
+      }
+      pSend(param1);
+    }
+    else if (message == MIDI_MESSAGE_NOTE_ON ||
+             message == MIDI_MESSAGE_NOTE_OFF ||
+             message == MIDI_MESSAGE_KEY_PRESSURE ||
+             message == MIDI_MESSAGE_CONTROL_CHANGE ||
+             messageByte == MIDI_MESSAGE_SONG_POSITION ||
+             message == MIDI_MESSAGE_PITCH_BAND_CHANGE)
+    {
+      if (*pLastMessageByte != messageByte)
+      {
+        pSend(messageByte);
+        *pLastMessageByte = messageByte;
+      }
+      pSend(param1);
+      pSend(param2);
+    }
+  }
+
+  buffUsbCurrIndex += 4;
+}
+
+void MIDI_addToUSBReport(uint8_t cable, uint8_t message, uint8_t param1, uint8_t param2)
+{
+  buffUsbReport[buffUsbReportNextIndex++] = (cable << 4) | (message >> 4);
+  buffUsbReport[buffUsbReportNextIndex++] = (message);
+  buffUsbReport[buffUsbReportNextIndex++] = (param1);
+  buffUsbReport[buffUsbReportNextIndex++] = (param2);
+
+  if (buffUsbReportNextIndex == MIDI_EPIN_SIZE)
+  {
+    while (USBD_MIDI_GetState(&hUsbDeviceFS) != MIDI_IDLE) {};
+    USBD_MIDI_SendReport(&hUsbDeviceFS, buffUsbReport, MIDI_EPIN_SIZE);
+    buffUsbReportNextIndex = 0;
+  }
+}
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

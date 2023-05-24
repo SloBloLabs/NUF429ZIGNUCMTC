@@ -191,119 +191,118 @@ typedef struct
 
 typedef struct
 {
-  int8_t (*Init)(uint32_t MidiFreq, uint32_t Volume, uint32_t options);
-  int8_t (*DeInit)(uint32_t options);
+  int8_t (*Init)(void);
+  int8_t (*DeInit)();
   int8_t (*Receive)(uint8_t *Buf, uint32_t *Len);
-  int8_t (*TransmitCplt)(uint8_t *Buf, uint32_t *Len, uint8_t epnum);
 } USBD_MIDI_ItfTypeDef;
 
 /*
  * Midi Class specification release 1.0
  */
 
-/* Table 4-2: Class-Specific AC Interface Header Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint16_t          bcdADC;
-  uint16_t          wTotalLength;
-  uint8_t           bInCollection;
-  uint8_t           baInterfaceNr;
-} __PACKED USBD_SpeakerIfDescTypeDef;
-
-/* Table 4-3: Input Terminal Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint8_t           bTerminalID;
-  uint16_t          wTerminalType;
-  uint8_t           bAssocTerminal;
-  uint8_t           bNrChannels;
-  uint16_t          wChannelConfig;
-  uint8_t           iChannelNames;
-  uint8_t           iTerminal;
-} __PACKED USBD_SpeakerInDescTypeDef;
-
-/* USB Speaker Midi Feature Unit Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint8_t           bUnitID;
-  uint8_t           bSourceID;
-  uint8_t           bControlSize;
-  uint16_t          bmaControls;
-  uint8_t           iTerminal;
-} __PACKED USBD_SpeakerFeatureDescTypeDef;
-
-/* Table 4-4: Output Terminal Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint8_t           bTerminalID;
-  uint16_t          wTerminalType;
-  uint8_t           bAssocTerminal;
-  uint8_t           bSourceID;
-  uint8_t           iTerminal;
-} __PACKED USBD_SpeakerOutDescTypeDef;
-
-/* Table 4-19: Class-Specific AS Interface Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint8_t           bTerminalLink;
-  uint8_t           bDelay;
-  uint16_t          wFormatTag;
-} __PACKED USBD_SpeakerStreamIfDescTypeDef;
-
-/* USB Speaker Midi Type III Format Interface Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptorSubtype;
-  uint8_t           bFormatType;
-  uint8_t           bNrChannels;
-  uint8_t           bSubFrameSize;
-  uint8_t           bBitResolution;
-  uint8_t           bSamFreqType;
-  uint8_t           tSamFreq2;
-  uint8_t           tSamFreq1;
-  uint8_t           tSamFreq0;
-} USBD_SpeakerIIIFormatIfDescTypeDef;
-
-/* Table 4-17: Standard AC Interrupt Endpoint Descriptor */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bEndpointAddress;
-  uint8_t           bmAttributes;
-  uint16_t          wMaxPacketSize;
-  uint8_t           bInterval;
-  uint8_t           bRefresh;
-  uint8_t           bSynchAddress;
-} __PACKED USBD_SpeakerEndDescTypeDef;
-
-/* Table 4-21: Class-Specific AS Isochronous Midi Data Endpoint Descriptor        */
-typedef struct
-{
-  uint8_t           bLength;
-  uint8_t           bDescriptorType;
-  uint8_t           bDescriptor;
-  uint8_t           bmAttributes;
-  uint8_t           bLockDelayUnits;
-  uint16_t          wLockDelay;
-} __PACKED USBD_SpeakerEndStDescTypeDef;
+///* Table 4-2: Class-Specific AC Interface Header Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint16_t          bcdADC;
+//  uint16_t          wTotalLength;
+//  uint8_t           bInCollection;
+//  uint8_t           baInterfaceNr;
+//} __PACKED USBD_SpeakerIfDescTypeDef;
+//
+///* Table 4-3: Input Terminal Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint8_t           bTerminalID;
+//  uint16_t          wTerminalType;
+//  uint8_t           bAssocTerminal;
+//  uint8_t           bNrChannels;
+//  uint16_t          wChannelConfig;
+//  uint8_t           iChannelNames;
+//  uint8_t           iTerminal;
+//} __PACKED USBD_SpeakerInDescTypeDef;
+//
+///* USB Speaker Midi Feature Unit Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint8_t           bUnitID;
+//  uint8_t           bSourceID;
+//  uint8_t           bControlSize;
+//  uint16_t          bmaControls;
+//  uint8_t           iTerminal;
+//} __PACKED USBD_SpeakerFeatureDescTypeDef;
+//
+///* Table 4-4: Output Terminal Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint8_t           bTerminalID;
+//  uint16_t          wTerminalType;
+//  uint8_t           bAssocTerminal;
+//  uint8_t           bSourceID;
+//  uint8_t           iTerminal;
+//} __PACKED USBD_SpeakerOutDescTypeDef;
+//
+///* Table 4-19: Class-Specific AS Interface Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint8_t           bTerminalLink;
+//  uint8_t           bDelay;
+//  uint16_t          wFormatTag;
+//} __PACKED USBD_SpeakerStreamIfDescTypeDef;
+//
+///* USB Speaker Midi Type III Format Interface Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptorSubtype;
+//  uint8_t           bFormatType;
+//  uint8_t           bNrChannels;
+//  uint8_t           bSubFrameSize;
+//  uint8_t           bBitResolution;
+//  uint8_t           bSamFreqType;
+//  uint8_t           tSamFreq2;
+//  uint8_t           tSamFreq1;
+//  uint8_t           tSamFreq0;
+//} USBD_SpeakerIIIFormatIfDescTypeDef;
+//
+///* Table 4-17: Standard AC Interrupt Endpoint Descriptor */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bEndpointAddress;
+//  uint8_t           bmAttributes;
+//  uint16_t          wMaxPacketSize;
+//  uint8_t           bInterval;
+//  uint8_t           bRefresh;
+//  uint8_t           bSynchAddress;
+//} __PACKED USBD_SpeakerEndDescTypeDef;
+//
+///* Table 4-21: Class-Specific AS Isochronous Midi Data Endpoint Descriptor        */
+//typedef struct
+//{
+//  uint8_t           bLength;
+//  uint8_t           bDescriptorType;
+//  uint8_t           bDescriptor;
+//  uint8_t           bmAttributes;
+//  uint8_t           bLockDelayUnits;
+//  uint16_t          wLockDelay;
+//} __PACKED USBD_SpeakerEndStDescTypeDef;
 
 /**
   * @}
@@ -338,6 +337,8 @@ extern void USBD_MIDI_DataInHandler(uint8_t * usb_rx_buffer, uint8_t usb_rx_buff
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev,
                                      USBD_MIDI_ItfTypeDef *fops);
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev);
+uint8_t USBD_MIDI_GetState(USBD_HandleTypeDef *pdev);
+uint8_t USBD_MIDI_SendReport(USBD_HandleTypeDef *pdev, uint8_t *report, uint16_t len);
 //void USBD_MIDI_Sync(USBD_HandleTypeDef *pdev, MIDI_OffsetTypeDef offset);
 
 #ifdef USE_USBD_COMPOSITE
