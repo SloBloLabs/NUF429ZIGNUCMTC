@@ -552,7 +552,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   /******************** MIDI Adapter Standard Bulk IN Endpoint Descriptor ********************/
   0x09,                    /*bLength: Size of this descriptor, in bytes*/
   USB_DESC_TYPE_ENDPOINT,  /*bDescriptorType: ENDPOINT descriptor.*/
-  MIDI_IN_EP,          /*bEndpointAddress: IN Endpoint 1.*/
+  MIDI_IN_EP,              /*bEndpointAddress: IN Endpoint 1.*/
   0x02,                    /*bmAttributes: Bulk, not shared.*/
   MIDI_EPIN_SIZE, 
   0x00,                    /*wMaxPacketSize*/
@@ -675,7 +675,7 @@ static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   //hmidi->rd_enable = 0U;
 
   /* Initialize the Midi output Hardware layer */
-  if (((USBD_MIDI_ItfTypeDef *)pdev->pUserData[pdev->classId])->Init())
+  if(((USBD_MIDI_ItfTypeDef *)pdev->pUserData[pdev->classId])->Init())
   {
     return (uint8_t)USBD_FAIL;
   }
@@ -903,6 +903,7 @@ static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev,
   */
 uint8_t USBD_MIDI_GetState(USBD_HandleTypeDef *pdev)
 {
+  printf("MIDI GET STATE\n");
   return ((USBD_MIDI_HandleTypeDef *)pdev->pClassData)->state;
 }
 
@@ -1027,7 +1028,7 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 
   /* Ensure that the FIFO is empty before a new transfer, this condition could 
      be caused by a new transfer before the end of the previous transfer */
-  if (epnum == MIDIInEpAdd)
+  if (epnum == (MIDIInEpAdd & 0x7F)) // TODO: check why epnum does not come as 0x81 as expected
   {
     ((USBD_MIDI_HandleTypeDef *)pdev->pClassData)->state = MIDI_IDLE;
   }
@@ -1165,6 +1166,44 @@ __weak extern void USBD_MIDI_DataInHandler(uint8_t * usb_rx_buffer, uint8_t usb_
 {
   printf("MIDI DATA IN HANDLER\n");
   // For user implementation.
+}
+
+// Test method from https://github.com/arneboe/con.trol/blob/master/test/SW4STM32/test/Application/User/hardware/usbd_midi_if.c
+static int8_t Midi_Receive(uint8_t *msg, uint32_t len) {
+
+	uint8_t chan = msg[1] & 0xf;
+	uint8_t msgtype = msg[1] & 0xf0;
+	uint8_t b1 =  msg[2];
+	uint8_t b2 =  msg[3];
+	uint16_t b = ((b2 & 0x7f) << 7) | (b1 & 0x7f);
+
+  UNUSED(chan);
+  UNUSED(b);
+
+	switch (msgtype) {
+	case 0x80:
+//		fluid_synth_noteoff(synth, chan, b1);
+		break;
+	case 0x90:
+//		fluid_synth_noteon(synth, chan, b1, b2);
+		break;
+	case 0xB0:
+//		fluid_synth_cc(synth, chan, b1, b2);
+		break;
+	case 0xC0:
+//		fluid_synth_program_change(synth, chan, b1);
+		break;
+	case 0xD0:
+//		fluid_synth_channel_pressure(synth, chan, b1);
+		break;
+	case 0xE0:
+//		fluid_synth_pitch_bend(synth, chan, b);
+		break;
+	default:
+		break;
+	}
+
+	return 0;
 }
 
 #ifndef USE_USBD_COMPOSITE

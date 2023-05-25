@@ -193,7 +193,7 @@ typedef struct
 {
   int8_t (*Init)(void);
   int8_t (*DeInit)();
-  int8_t (*Receive)(uint8_t *Buf, uint32_t *Len);
+  //int8_t (*Receive)(uint8_t *Buf, uint32_t *Len);
 } USBD_MIDI_ItfTypeDef;
 
 /*

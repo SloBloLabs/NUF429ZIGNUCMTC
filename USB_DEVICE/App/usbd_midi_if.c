@@ -122,7 +122,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 
 static int8_t MIDI_Init_FS();
 static int8_t MIDI_DeInit_FS();
-static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t *Len);
+//static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t *Len);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -136,7 +136,7 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
 {
   MIDI_Init_FS,
   MIDI_DeInit_FS,
-  MIDI_Receive_FS
+  //MIDI_Receive_FS
 };
 
 /* Private functions ---------------------------------------------------------*/
@@ -168,46 +168,46 @@ static int8_t MIDI_DeInit_FS()
   /* USER CODE END 1 */
 }
 
-/**
-  * @brief  Data received over USB OUT endpoint are sent over CDC interface
-  *         through this function.
-  *
-  *         @note
-  *         This function will issue a NAK packet on any OUT packet received on
-  *         USB endpoint until exiting this function. If you exit this function
-  *         before transfer is complete on CDC interface (ie. using DMA controller)
-  *         it will result in receiving more data while previous ones are still
-  *         not sent.
-  *
-  * @param  Buf: Buffer of data to be received
-  * @param  Len: Number of data received (in bytes)
-  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
-  */
-static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t *Len)
-{
-  /* USER CODE BEGIN 6 */
-  //USBD_MIDI_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  //USBD_MIDI_ReceivePacket(&hUsbDeviceFS);
-
-  //ring_buffer_queue_arr(&ring_buffer, (char*)Buf, *Len);
-
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  ring_buffer_queue(&ring_buffer, Buf[i]);
-  //}
-  
-  // *Buf and *UserRxBufferFS are identical
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  printf("%c", UserRxBufferFS[i]);
-  //}
-  //printf("\n");
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  printf("%c", Buf[i]);
-  //}
-  //printf("\n");
-  //numChars += *Len;
-  return (USBD_OK);
-  /* USER CODE END 6 */
-}
+///**
+//  * @brief  Data received over USB OUT endpoint are sent over CDC interface
+//  *         through this function.
+//  *
+//  *         @note
+//  *         This function will issue a NAK packet on any OUT packet received on
+//  *         USB endpoint until exiting this function. If you exit this function
+//  *         before transfer is complete on CDC interface (ie. using DMA controller)
+//  *         it will result in receiving more data while previous ones are still
+//  *         not sent.
+//  *
+//  * @param  Buf: Buffer of data to be received
+//  * @param  Len: Number of data received (in bytes)
+//  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
+//  */
+//static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t *Len)
+//{
+//  /* USER CODE BEGIN 6 */
+//  //USBD_MIDI_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+//  //USBD_MIDI_ReceivePacket(&hUsbDeviceFS);
+//
+//  //ring_buffer_queue_arr(&ring_buffer, (char*)Buf, *Len);
+//
+//  //for(uint32_t i = 0; i < *Len; ++i) {
+//  //  ring_buffer_queue(&ring_buffer, Buf[i]);
+//  //}
+//  
+//  // *Buf and *UserRxBufferFS are identical
+//  //for(uint32_t i = 0; i < *Len; ++i) {
+//  //  printf("%c", UserRxBufferFS[i]);
+//  //}
+//  //printf("\n");
+//  //for(uint32_t i = 0; i < *Len; ++i) {
+//  //  printf("%c", Buf[i]);
+//  //}
+//  //printf("\n");
+//  //numChars += *Len;
+//  return (USBD_OK);
+//  /* USER CODE END 6 */
+//}
 
 void USBD_MIDI_DataInHandler(uint8_t *usb_rx_buffer, uint8_t usb_rx_buffer_length)
 {
