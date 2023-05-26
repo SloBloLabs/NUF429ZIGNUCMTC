@@ -27,8 +27,8 @@ void projectMain() {
             uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
             printf("loop %d\n", i);
             uint8_t cable = 0;
-            uint8_t message = pinSet ? 9 : 8;
-            uint8_t param1 = 0x3C;
+            uint8_t message = pinSet ? 0x90 : 0x80;
+            uint8_t param1 = 0x60;
             uint8_t param2 = 0x64;
             uint8_t msg[4] = {cable, message, param1, param2};
             MIDI_sendMessage(msg, 4);
