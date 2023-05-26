@@ -88,12 +88,7 @@
   */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-static uint8_t buffUsbReport[MIDI_EPIN_SIZE] = {0};
-static uint8_t buffUsbReportNextIndex = 0;
 
-static uint8_t buffUsb[MIDI_BUFFER_LENGTH] = {0};
-static volatile uint8_t buffUsbNextIndex = 0;
-static uint8_t buffUsbCurrIndex = 0;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -120,9 +115,10 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
   * @{
   */
 
-static int8_t MIDI_Init_FS();
-static int8_t MIDI_DeInit_FS();
-//static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t *Len);
+static int8_t MIDI_Init_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
+static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
+static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t length);
+static int8_t MIDI_Send_FS(uint8_t* pbuf, uint32_t length);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -136,7 +132,8 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
 {
   MIDI_Init_FS,
   MIDI_DeInit_FS,
-  //MIDI_Receive_FS
+  MIDI_Receive_FS,
+  MIDI_Send_FS
 };
 
 /* Private functions ---------------------------------------------------------*/
@@ -147,7 +144,7 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
   * @param  options: Reserved for future use
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t MIDI_Init_FS()
+static int8_t MIDI_Init_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   /* USER CODE BEGIN 0 */
   printf("Midi Init\n");
@@ -160,7 +157,7 @@ static int8_t MIDI_Init_FS()
   * @param  options: Reserved for future use
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t MIDI_DeInit_FS()
+static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   /* USER CODE BEGIN 1 */
   printf("Midi DeInit\n");
@@ -168,169 +165,125 @@ static int8_t MIDI_DeInit_FS()
   /* USER CODE END 1 */
 }
 
-///**
-//  * @brief  Data received over USB OUT endpoint are sent over CDC interface
-//  *         through this function.
-//  *
-//  *         @note
-//  *         This function will issue a NAK packet on any OUT packet received on
-//  *         USB endpoint until exiting this function. If you exit this function
-//  *         before transfer is complete on CDC interface (ie. using DMA controller)
-//  *         it will result in receiving more data while previous ones are still
-//  *         not sent.
-//  *
-//  * @param  Buf: Buffer of data to be received
-//  * @param  Len: Number of data received (in bytes)
-//  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
-//  */
-//static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t *Len)
-//{
-//  /* USER CODE BEGIN 6 */
-//  //USBD_MIDI_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-//  //USBD_MIDI_ReceivePacket(&hUsbDeviceFS);
-//
-//  //ring_buffer_queue_arr(&ring_buffer, (char*)Buf, *Len);
-//
-//  //for(uint32_t i = 0; i < *Len; ++i) {
-//  //  ring_buffer_queue(&ring_buffer, Buf[i]);
-//  //}
-//  
-//  // *Buf and *UserRxBufferFS are identical
-//  //for(uint32_t i = 0; i < *Len; ++i) {
-//  //  printf("%c", UserRxBufferFS[i]);
-//  //}
-//  //printf("\n");
-//  //for(uint32_t i = 0; i < *Len; ++i) {
-//  //  printf("%c", Buf[i]);
-//  //}
-//  //printf("\n");
-//  //numChars += *Len;
-//  return (USBD_OK);
-//  /* USER CODE END 6 */
-//}
-
-void USBD_MIDI_DataInHandler(uint8_t *usb_rx_buffer, uint8_t usb_rx_buffer_length)
+/**
+  * @brief  Data received over USB OUT endpoint are sent over CDC interface
+  *         through this function.
+  *
+  *         @note
+  *         This function will issue a NAK packet on any OUT packet received on
+  *         USB endpoint until exiting this function. If you exit this function
+  *         before transfer is complete on CDC interface (ie. using DMA controller)
+  *         it will result in receiving more data while previous ones are still
+  *         not sent.
+  *
+  * @param  Buf: Buffer of data to be received
+  * @param  Len: Number of data received (in bytes)
+  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
+  */
+static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t Len)
 {
-  printf("MidiIF: Handling Data, size=%d\n", usb_rx_buffer_length);
-  for(uint32_t i = 0; i < usb_rx_buffer_length; ++i) {
-    //printf("%d", usb_rx_buffer[i]);
-    printf("%0x", usb_rx_buffer[i] & 0xff);
-  }
-  printf("\n");
+  /* USER CODE BEGIN 6 */
+  uint8_t chan = Buf[1] & 0xf;
+  uint8_t msgtype = Buf[1] & 0xf0;
+  uint8_t b1 =  Buf[2];
+  uint8_t b2 =  Buf[3];
+  uint16_t b = ((b2 & 0x7f) << 7) | (b1 & 0x7f);
 
-  while (usb_rx_buffer_length && *usb_rx_buffer != 0x00)
-  {
-    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
-    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
-    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
-    buffUsb[buffUsbNextIndex++] = *usb_rx_buffer++;
+  UNUSED(b);
 
-    usb_rx_buffer_length -= 4;
-  }
-}
-/* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
-
-bool MIDI_HasUSBData(void)
-{
-  return buffUsbCurrIndex != buffUsbNextIndex;
-}
-
-void MIDI_ProcessUSBData(void)
-{
-  static uint8_t lastMessagesBytePerCable[MIDI_CABLES_NUMBER] = {0};
-  uint8_t *pLastMessageByte;
-  uint8_t cable;
-  uint8_t messageByte;
-  uint8_t message;
-  uint8_t param1;
-  uint8_t param2;
-  void (*pSend)(uint8_t);
-
-  if (buffUsbCurrIndex == buffUsbNextIndex)
-    return;
-
-  cable = (buffUsb[buffUsbCurrIndex] >> 4);
-  messageByte = buffUsb[buffUsbCurrIndex + 1];
-
-  if (cable == 0)
-  {
-    pLastMessageByte = &lastMessagesBytePerCable[0];
-    //pSend = &UART1_Send;
-    printf("Send cable 1\n");
-  }
-  else if (cable == 1)
-  {
-    pLastMessageByte = &lastMessagesBytePerCable[1];
-    //pSend = &UART2_Send;
-    printf("Send cable 2\n");
-  }
-  else if (cable == 2)
-  {
-    pLastMessageByte = &lastMessagesBytePerCable[2];
-    //pSend = &UART3_Send;
-    printf("Send cable 3\n");
-  }
-  else
-  {
-    pSend = NULL;
-  }
-
-  if (pSend != NULL)
-  {
-    message = (messageByte >> 4);
-    param1 = buffUsb[buffUsbCurrIndex + 2];
-    param2 = buffUsb[buffUsbCurrIndex + 3];
-
-    if ((messageByte & MIDI_MASK_REAL_TIME_MESSAGE) == MIDI_MASK_REAL_TIME_MESSAGE)
-    {
-      pSend(messageByte);
+  printf("MIDI_Receive_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", chan, msgtype, b1, b2);
+  
+  switch (msgtype) {
+  case 0xF0:
+    if(chan == 0x0F) {
+        NVIC_SystemReset(); // Reset into DFU mode
     }
-    else if (message == MIDI_MESSAGE_CHANNEL_PRESSURE ||
-             message == MIDI_MESSAGE_PROGRAM_CHANGE ||
-             messageByte == MIDI_MESSAGE_TIME_CODE_QTR_FRAME ||
-             messageByte == MIDI_MESSAGE_SONG_SELECT)
-    {
-      if (*pLastMessageByte != messageByte)
-      {
-        pSend(messageByte);
-        *pLastMessageByte = messageByte;
-      }
-      pSend(param1);
-    }
-    else if (message == MIDI_MESSAGE_NOTE_ON ||
-             message == MIDI_MESSAGE_NOTE_OFF ||
-             message == MIDI_MESSAGE_KEY_PRESSURE ||
-             message == MIDI_MESSAGE_CONTROL_CHANGE ||
-             messageByte == MIDI_MESSAGE_SONG_POSITION ||
-             message == MIDI_MESSAGE_PITCH_BAND_CHANGE)
-    {
-      if (*pLastMessageByte != messageByte)
-      {
-        pSend(messageByte);
-        *pLastMessageByte = messageByte;
-      }
-      pSend(param1);
-      pSend(param2);
-    }
+  	break;
+  default:
+  	break;
   }
 
-  buffUsbCurrIndex += 4;
+  // TODO: promote event to application ring buffer
+  
+  //USBD_MIDI_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+  //USBD_MIDI_ReceivePacket(&hUsbDeviceFS);
+
+  //ring_buffer_queue_arr(&ring_buffer, (char*)Buf, *Len);
+
+  //for(uint32_t i = 0; i < *Len; ++i) {
+  //  ring_buffer_queue(&ring_buffer, Buf[i]);
+  //}
+  
+  // *Buf and *UserRxBufferFS are identical
+  //for(uint32_t i = 0; i < *Len; ++i) {
+  //  printf("%c", UserRxBufferFS[i]);
+  //}
+  //printf("\n");
+  //for(uint32_t i = 0; i < *Len; ++i) {
+  //  printf("%c", Buf[i]);
+  //}
+  //printf("\n");
+  //numChars += *Len;
+
+  return (USBD_OK);
+  /* USER CODE END 6 */
 }
 
-void MIDI_addToUSBReport(uint8_t cable, uint8_t message, uint8_t param1, uint8_t param2)
+/**
+  * @brief  MIDI_Send
+  *
+  * @param  buffer: bufferfer of data to be received
+  * @param  length: Number of data received (in bytes)
+  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
+  */
+static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
 {
-  buffUsbReport[buffUsbReportNextIndex++] = (cable << 4) | (message >> 4);
-  buffUsbReport[buffUsbReportNextIndex++] = (message);
-  buffUsbReport[buffUsbReportNextIndex++] = (param1);
-  buffUsbReport[buffUsbReportNextIndex++] = (param2);
+  uint8_t ret = USBD_OK;
 
-  if (buffUsbReportNextIndex == MIDI_EPIN_SIZE)
-  {
-    while (USBD_MIDI_GetState(&hUsbDeviceFS) != MIDI_IDLE) {};
-    USBD_MIDI_SendReport(&hUsbDeviceFS, buffUsbReport, MIDI_EPIN_SIZE);
-    buffUsbReportNextIndex = 0;
-  }
+  USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, buffer, length);
+
+  ret = USBD_MIDI_TransmitPacket(&hUsbDeviceFS);
+
+  return (ret);
 }
+
+void MIDI_sendMessage(uint8_t* msg, uint8_t length) {
+  MIDI_Send_FS(msg, length);
+}
+
+void MIDI_note_on(uint8_t note, uint8_t velocity) {
+    uint8_t b[4];
+    b[0] = 0x0B;
+    b[1] = 0x90;
+    b[2] = note;
+    b[3] = velocity;
+
+    MIDI_Send_FS(b, 4);
+
+}
+
+void MIDI_note_off(uint8_t note, uint8_t velocity) {
+    uint8_t b[4];
+    b[0] = 0x0B;
+    b[1] = 0x80;
+    b[2] = note;
+    b[3] = velocity;
+
+    MIDI_Send_FS(b, 4);
+
+}
+
+void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value) {
+    uint8_t b[4];
+    b[0] = 0x0B;
+    b[1] = 0xB0 | channel;
+    b[2] = controler_number;
+    b[3] = controller_value;
+
+    MIDI_Send_FS(b, 4);
+
+}
+
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

@@ -28,7 +28,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_midi.h"
 #include "swvPrint.h"
-#include <stdbool.h>
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -50,51 +49,7 @@
   */
 
 /* USER CODE BEGIN EXPORTED_DEFINES */
-#define MIDI_CABLES_NUMBER 3
 
-#define MIDI_BUFFER_LENGTH           256
-#define MIDI_MAX_CHANNELS_NUM        16
-#define MIDI_MAX_CABLES_NUM          16
-#define MIDI_MAX_ADDITIONAL_VELOCITY 127
-#define MIDI_MAX_NOTE_SHIFT          24
-#define MIDI_MIN_NOTE_SHIFT         -24
-
-#define MIDI_MESSAGE_NOTE_OFF          0x08
-#define MIDI_MESSAGE_NOTE_ON           0x09
-#define MIDI_MESSAGE_KEY_PRESSURE      0x0A
-#define MIDI_MESSAGE_CONTROL_CHANGE    0x0B
-#define MIDI_MESSAGE_PROGRAM_CHANGE    0x0C
-#define MIDI_MESSAGE_CHANNEL_PRESSURE  0x0D
-#define MIDI_MESSAGE_PITCH_BAND_CHANGE 0x0E
-
-#define MIDI_MESSAGE_TIMING_CLOCK   0xF8
-#define MIDI_MESSAGE_START          0xFA
-#define MIDI_MESSAGE_CONTINUE       0xFB
-#define MIDI_MESSAGE_STOP           0xFC
-#define MIDI_MESSAGE_ACTIVE_SENSING 0xFE
-#define MIDI_MESSAGE_SYSTEM_RESET   0xFF
-
-#define MIDI_MESSAGE_TIME_CODE_QTR_FRAME 0xF1
-#define MIDI_MESSAGE_SONG_POSITION       0xF2
-#define MIDI_MESSAGE_SONG_SELECT         0xF3
-
-#define MIDI_MASK_STATUS_BYTE       0x80
-#define MIDI_MASK_REAL_TIME_MESSAGE 0xF8
-
-#define MIDI_MESSAGE_CONTROL_ALL_SOUNDS_OFF        120
-#define MIDI_MESSAGE_CONTROL_RESET_ALL_CONTROLLERS 121
-#define MIDI_MESSAGE_CONTROL_ALL_NOTES_OFF         123
-
-#define MIDI_MESSAGE_PITCH_BAND_MIDDLE 8192
-#define MIDI_MESSAGE_PITCH_BAND_MAX    16383
-#define MIDI_MESSAGE_PITCH_BAND_MIN    0
-
-#define MIDI_MESSAGE_NOTE_MAX             127
-#define MIDI_MESSAGE_NOTE_VOLUME_MAX      127
-#define MIDI_MESSAGE_CONTROL_VALUE_MAX    127
-#define MIDI_MESSAGE_CONTROL_VALUE_MIN    0
-#define MIDI_MESSAGE_CONTROL_VALUE_MIDDLE 64
-#define MIDI_MESSAGE_DEFAULT_VOLUME       100
 /* USER CODE END EXPORTED_DEFINES */
 
 /**
@@ -133,6 +88,7 @@
   */
 
 /** MIDI_IF Interface callback. */
+extern USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
@@ -150,8 +106,10 @@ extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
-void MIDI_ProcessUSBData(void);
-void MIDI_addToUSBReport(uint8_t cable, uint8_t message, uint8_t param1, uint8_t param2);
+void MIDI_sendMessage(uint8_t* msg, uint8_t length);
+void MIDI_note_on(uint8_t note, uint8_t velocity);
+void MIDI_note_off(uint8_t note, uint8_t velocity);
+void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value);
 
 /* USER CODE END EXPORTED_FUNCTIONS */
 
