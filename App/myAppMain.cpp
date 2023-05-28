@@ -26,7 +26,8 @@ void projectMain() {
             LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
             uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
             printf("loop %d\n", i);
-            uint8_t cable = 0;
+            uint8_t midiChannel = 1;
+            uint8_t cable = (pinSet ? 0x09 : 0x08) | ((midiChannel - 1) << 4);
             uint8_t message = pinSet ? 0x90 : 0x80;
             uint8_t param1 = 0x60;
             uint8_t param2 = 0x64;

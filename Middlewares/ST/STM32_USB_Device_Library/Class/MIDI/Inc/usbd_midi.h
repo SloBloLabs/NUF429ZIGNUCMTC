@@ -41,6 +41,8 @@ extern "C" {
   * @{
   */
 
+//#define USB_MIDI_CONFIG_DESC_SIZ                     0x85U
+
 #define USB_MIDI_CLASS_DESC_SHIFT      18
 #define USB_MIDI_DESC_SIZE             7
 #define USB_MIDI_REPORT_DESC_SIZE      (MIDI_IN_PORTS_NUM * 16 + MIDI_OUT_PORTS_NUM * 16 + 33)
