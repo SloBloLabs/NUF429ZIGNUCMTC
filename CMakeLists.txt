@@ -39,7 +39,6 @@ set(CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/App
     ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/Target
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/MIDI/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc
@@ -55,7 +54,6 @@ file(GLOB_RECURSE STM32CUBEMX_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/App/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/USB_DEVICE/Target/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/AUDIO/Src/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/MIDI/Src/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/*.c

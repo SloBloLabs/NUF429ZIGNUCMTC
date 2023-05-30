@@ -90,7 +90,6 @@
 /** MIDI_IF Interface callback. */
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
-
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
 /* USER CODE END EXPORTED_VARIABLES */
@@ -106,10 +105,10 @@ extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
-void MIDI_sendMessage(uint8_t* msg, uint8_t length);
-void MIDI_note_on(uint8_t note, uint8_t velocity);
-void MIDI_note_off(uint8_t note, uint8_t velocity);
-void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value);
+int8_t MIDI_sendMessage(uint8_t* msg, uint8_t length);
+//void MIDI_note_on(uint8_t note, uint8_t velocity);
+//void MIDI_note_off(uint8_t note, uint8_t velocity);
+//void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value);
 
 /* USER CODE END EXPORTED_FUNCTIONS */
 

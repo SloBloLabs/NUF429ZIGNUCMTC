@@ -102,6 +102,8 @@
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
+void enqueueIncoming(uint8_t *data);
+
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
 /* USER CODE END EXPORTED_VARIABLES */
@@ -147,7 +149,7 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
 static int8_t MIDI_Init_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   /* USER CODE BEGIN 0 */
-  printf("Midi Init\n");
+  printf("Midi IF Init\n");
   return (USBD_OK);
   /* USER CODE END 0 */
 }
@@ -160,7 +162,7 @@ static int8_t MIDI_Init_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   /* USER CODE BEGIN 1 */
-  printf("Midi DeInit\n");
+  printf("Midi IF DeInit\n");
   return (USBD_OK);
   /* USER CODE END 1 */
 }
@@ -183,47 +185,15 @@ static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t Len)
 {
   /* USER CODE BEGIN 6 */
-  uint8_t chan = Buf[1] & 0xf;
-  uint8_t msgtype = Buf[1] & 0xf0;
-  uint8_t b1 =  Buf[2];
-  uint8_t b2 =  Buf[3];
-  uint16_t b = ((b2 & 0x7f) << 7) | (b1 & 0x7f);
+  //uint8_t chan = Buf[1] & 0xf;
+  //uint8_t msgtype = Buf[1] & 0xf0;
+  //uint8_t b1 =  Buf[2];
+  //uint8_t b2 =  Buf[3];
+  //uint16_t b = ((b2 & 0x7f) << 7) | (b1 & 0x7f);
+  //UNUSED(b);
+  //printf("MIDI_Receive_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", chan, msgtype, b1, b2);
 
-  UNUSED(b);
-
-  printf("MIDI_Receive_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", chan, msgtype, b1, b2);
-  
-  switch (msgtype) {
-  case 0xF0:
-    if(chan == 0x0F) {
-        NVIC_SystemReset(); // Reset into DFU mode
-    }
-  	break;
-  default:
-  	break;
-  }
-
-  // TODO: promote event to application ring buffer
-  
-  //USBD_MIDI_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  //USBD_MIDI_ReceivePacket(&hUsbDeviceFS);
-
-  //ring_buffer_queue_arr(&ring_buffer, (char*)Buf, *Len);
-
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  ring_buffer_queue(&ring_buffer, Buf[i]);
-  //}
-  
-  // *Buf and *UserRxBufferFS are identical
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  printf("%c", UserRxBufferFS[i]);
-  //}
-  //printf("\n");
-  //for(uint32_t i = 0; i < *Len; ++i) {
-  //  printf("%c", Buf[i]);
-  //}
-  //printf("\n");
-  //numChars += *Len;
+  enqueueIncoming(Buf);
 
   return (USBD_OK);
   /* USER CODE END 6 */
@@ -247,47 +217,47 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
   return (ret);
 }
 
-void MIDI_sendMessage(uint8_t* msg, uint8_t length) {
+int8_t MIDI_sendMessage(uint8_t* msg, uint8_t length) {
   uint8_t cable = msg[0];
   uint8_t message = msg[1];
   uint8_t param1 = msg[2];
   uint8_t param2 = msg[3];
   printf("MIDI_sendMessage: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
-  MIDI_Send_FS(msg, length);
+  return MIDI_Send_FS(msg, length);
 }
 
-void MIDI_note_on(uint8_t note, uint8_t velocity) {
-    uint8_t b[4];
-    b[0] = 0x0B;
-    b[1] = 0x90;
-    b[2] = note;
-    b[3] = velocity;
-
-    MIDI_Send_FS(b, 4);
-
-}
-
-void MIDI_note_off(uint8_t note, uint8_t velocity) {
-    uint8_t b[4];
-    b[0] = 0x0B;
-    b[1] = 0x80;
-    b[2] = note;
-    b[3] = velocity;
-
-    MIDI_Send_FS(b, 4);
-
-}
-
-void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value) {
-    uint8_t b[4];
-    b[0] = 0x0B;
-    b[1] = 0xB0 | channel;
-    b[2] = controler_number;
-    b[3] = controller_value;
-
-    MIDI_Send_FS(b, 4);
-
-}
+//void MIDI_note_on(uint8_t note, uint8_t velocity) {
+//    uint8_t b[4];
+//    b[0] = 0x0B;
+//    b[1] = 0x90;
+//    b[2] = note;
+//    b[3] = velocity;
+//
+//    MIDI_Send_FS(b, 4);
+//
+//}
+//
+//void MIDI_note_off(uint8_t note, uint8_t velocity) {
+//    uint8_t b[4];
+//    b[0] = 0x0B;
+//    b[1] = 0x80;
+//    b[2] = note;
+//    b[3] = velocity;
+//
+//    MIDI_Send_FS(b, 4);
+//
+//}
+//
+//void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value) {
+//    uint8_t b[4];
+//    b[0] = 0x0B;
+//    b[1] = 0xB0 | channel;
+//    b[2] = controler_number;
+//    b[3] = controller_value;
+//
+//    MIDI_Send_FS(b, 4);
+//
+//}
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

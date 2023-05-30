@@ -3,22 +3,27 @@
 #include <cstdio>
 #include "usbd_midi_if.h"
 #include "string.h"
+#include "midi/MidiHandler.h"
+
+MidiHandler midiHandler;
 
 void projectMain() {
     // Configure and enable Systick timer including interrupt
     SysTick_Config(SystemCoreClock / 1000 - 1);
 
+    midiHandler.init();
+
     //char const *data = "Hello from NUF429ZIGNUCMTC\n";
 
     while(true) {
         while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin)) {
-          //MIDI_ProcessUSBData();
+          while(!midiHandler.incomingIsEmpty()) {
+            MidiMessage msg;
+            midiHandler.dequeueIncoming(&msg);
+            MidiMessage::dump(msg);
 
-          //LL_GPIO_ResetOutputPin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-          //for(uint8_t i = 0; i < buffUsbCurrIndex; ++i) {
-
-          //  LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-          //}
+            LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+          }
         }
 
         LL_GPIO_ResetOutputPin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
@@ -26,15 +31,26 @@ void projectMain() {
             LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
             uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
             printf("loop %d\n", i);
-            uint8_t midiChannel = 1;
-            uint8_t cable = (pinSet ? 0x09 : 0x08) | ((midiChannel - 1) << 4);
-            uint8_t message = pinSet ? 0x90 : 0x80;
-            uint8_t param1 = 0x60;
-            uint8_t param2 = 0x64;
-            uint8_t msg[4] = {cable, message, param1, param2};
-            MIDI_sendMessage(msg, 4);
+            uint8_t midiChannel = 5;
+            MidiMessage msg = pinSet ?
+                MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
+                MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
+            MidiMessage::dump(msg);
+            midiHandler.enqueueOutgoing(msg);
+            midiHandler.processOutgoing();
             //CDC_Transmit_FS((uint8_t*)data, strlen(data));
-            LL_mDelay(200);
+            LL_mDelay(100);
         }
     }
+}
+
+extern "C" {
+
+void enqueueIncoming(uint8_t *data) {
+    MidiUSBMessage umsg(data);
+    MidiMessage msg;
+    umsg.getMidiMessage(msg);
+    midiHandler.enqueueIncoming(msg);
+}
+
 }
