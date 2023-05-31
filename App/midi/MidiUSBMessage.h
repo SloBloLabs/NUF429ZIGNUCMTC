@@ -31,15 +31,6 @@ enum ChannelIndexNumber {
 //#define MIDI_MANID_NON_REALTIME            0x7E
 //#define MIDI_MANID_REALTIME                0x7F
 
-// Channel Voice Message
-//#define MIDI_NOTE_OFF                      0x80
-//#define MIDI_NOTE_ON                       0x90
-//#define MIDI_POLYPHONIC_KEY_PRESSURE       0xA0
-//#define MIDI_CONTROL_CHANGE                0xB0
-//#define MIDI_PROGRAM_CHANGE                0xC0
-//#define MIDI_CHANNEL_PRESSURE              0xD0
-//#define MIDI_PITCH_BEND                    0xE0
-
 // Channel Mode Message
 //#define MIDI_ALL_SOUND_OFF                 0x78
 //#define MIDI_RESET_ALL_CONTROLLER          0x79
@@ -51,14 +42,6 @@ enum ChannelIndexNumber {
 //#define MIDI_OMNI_OFF                      0x7C
 //#define MIDI_POLY                          0x7F
 //#define MIDI_MONO                          0x7E
-
-// System Realtime
-//#define MIDI_TIMING_CLOCK                  0xF8
-//#define MIDI_START                         0xFA
-//#define MIDI_CONTINUE                      0xF8
-//#define MIDI_STOP                          0xFC
-//#define MIDI_ACTIVE_SENSING                0xFE
-//#define MIDI_SYSTEM_RESET                  0xFF
 
 class MidiUSBMessage {
 public:

@@ -7,8 +7,6 @@
 
 class MidiMessage {
 public:
-    //using PayloadID = uint8_t;
-    //static constexpr PayloadID InvalidPayload = 0;
 
     // Channel (voice) messages
 
@@ -254,45 +252,6 @@ public:
     bool isActiveSensing() const { return isRealTimeMessage<ActiveSensing>(status()); }
     bool isReset() const { return isRealTimeMessage<Reset>(status()); }
 
-    // Payload
-
-    //bool hasPayload() const {
-    //    return payloadID() != InvalidPayload;
-    //}
-//
-    //void clearPayload() {
-    //    auto id = payloadID();
-    //    if (id != InvalidPayload) {
-    //        decPayloadRefCount(id);
-    //        setPayloadID(InvalidPayload);
-    //    }
-    //}
-//
-    //void setPayload(const uint8_t *data, size_t size) {
-    //    clearPayload();
-    //    auto id = allocatePayload(size);
-    //    if (id != InvalidPayload) {
-    //        setPayloadID(id);
-    //        std::memcpy(payloadData(id), data, size);
-    //    }
-    //}
-//
-    //const uint8_t *payloadData() const {
-    //    return payloadData(payloadID());
-    //}
-//
-    //size_t payloadLength() const {
-    //    return payloadLength(payloadID());
-    //}
-//
-    //void setPayloadID(PayloadID id) {
-    //    _length = (_length & 0x3) | (id << 2);
-    //}
-//
-    //PayloadID payloadID() const {
-    //    return _length >> 2;
-    //}
-
     // Utilities
 
     void fixFakeNoteOff() {
@@ -308,51 +267,33 @@ public:
         _raw[0] = other._raw[0];
         _raw[1] = other._raw[1];
         _raw[2] = other._raw[2];
-        //_length = other._length;
-
-        //if (hasPayload()) {
-        //    incPayloadRefCount(payloadID());
-        //}
     }
     MidiMessage(uint8_t status) :
-        _raw { status } //, _length(1)
+        _raw { status }
     {}
     MidiMessage(uint8_t status, uint8_t data0) :
-        _raw { status, data0 } //, _length(2)
+        _raw { status, data0 }
     {}
     MidiMessage(uint8_t status, uint8_t data0, uint8_t data1) :
-        _raw { status, data0, data1 } //, _length(3)
+        _raw { status, data0, data1 }
     {}
 
-    MidiMessage(const uint8_t *raw /*, size_t length*/) {
+    MidiMessage(const uint8_t *raw) {
         _raw[0] = raw[0];
         // only calculate once
         uint8_t len = length();
         _raw[1] = len > 0 ? raw[1] : 0;
         _raw[2] = len > 1 ? raw[2] : 0;
-        //_length = std::min(size_t(2), length);
     }
 
     ~MidiMessage() {
-        //if (hasPayload()) {
-        //    decPayloadRefCount(payloadID());
-        //}
     }
 
     MidiMessage& operator=(const MidiMessage& other)
     {
-        //if (hasPayload()) {
-        //    decPayloadRefCount(payloadID());
-        //}
-
         _raw[0] = other._raw[0];
         _raw[1] = other._raw[1];
         _raw[2] = other._raw[2];
-        //_length = other._length;
-
-        //if (hasPayload()) {
-        //    incPayloadRefCount(payloadID());
-        //}
 
         return *this;
     }
@@ -400,28 +341,7 @@ public:
         return byte & 0x80;
     };
 
-    //static void setPayloadPool(uint8_t *data, size_t length);
-
 private:
-    //static PayloadID allocatePayload(size_t length);
-    //static void incPayloadRefCount(PayloadID id);
-    //static void decPayloadRefCount(PayloadID id);
-    //static uint8_t *payloadData(PayloadID id);
-    //static size_t payloadLength(PayloadID id);
-//
-    //struct PayloadPool {
-    //    uint8_t *data = nullptr;
-    //    size_t length = 0;
-//
-    //    PayloadID payloadID = InvalidPayload;
-    //    uint32_t payloadRefCount = 0;
-    //    size_t payloadLength = 0;
-//
-    //    bool valid() const { return data != nullptr; }
-    //};
-//
-    //static PayloadPool _payloadPool;
 
     uint8_t _raw[3];
-    //uint8_t _length = 0;
 };
