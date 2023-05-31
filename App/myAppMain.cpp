@@ -28,21 +28,70 @@ void projectMain() {
         }
 
         LL_GPIO_ResetOutputPin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-        for(uint8_t i = 0; i < 2; ++i) {
-            LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-            uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
-            //printf("loop %d\n", i);
-            uint8_t midiChannel = 5;
-            MidiMessage msg = pinSet ?
-                MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
-                MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
-            printf("Midi Send: ");
-            MidiMessage::dump(msg);
-            midiHandler.enqueueOutgoing(msg);
-            midiHandler.processOutgoing();
-            //CDC_Transmit_FS((uint8_t*)data, strlen(data));
-            LL_mDelay(100);
-        }
+
+        uint8_t midiChannel = 15;
+        uint8_t timeSpan = 200;
+
+        MidiMessage msg;
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x3C, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
+        midiHandler.enqueueOutgoing(msg);
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x3E, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x3E, 100);
+        midiHandler.enqueueOutgoing(msg);
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x40, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x40, 100);
+        midiHandler.enqueueOutgoing(msg);
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x41, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x41, 100);
+        midiHandler.enqueueOutgoing(msg);
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x43, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan << 1);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x43, 100);
+        midiHandler.enqueueOutgoing(msg);
+        msg = MidiMessage::makeNoteOn(midiChannel, 0x43, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        LL_mDelay(timeSpan << 1);
+        msg = MidiMessage::makeNoteOff(midiChannel, 0x43, 100);
+        midiHandler.enqueueOutgoing(msg);
+        midiHandler.processOutgoing();
+        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+
+        //for(uint8_t i = 0; i < 2; ++i) {
+        //    LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        //    uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
+        //    //printf("loop %d\n", i);
+        //    MidiMessage msg = pinSet ?
+        //        MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
+        //        MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
+        //    printf("Midi Send: ");
+        //    MidiMessage::dump(msg);
+        //    midiHandler.enqueueOutgoing(msg);
+        //    midiHandler.processOutgoing();
+        //    //CDC_Transmit_FS((uint8_t*)data, strlen(data));
+        //    LL_mDelay(100);
+        //}
     }
 }
 
