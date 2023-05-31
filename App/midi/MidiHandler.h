@@ -5,6 +5,7 @@
 #include "midi/MidiUSBMessage.h"
 #include "usbd_midi_if.h"
 
+extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
 class MidiHandler {
 public:
     MidiHandler() = default;
@@ -27,8 +28,12 @@ public:
         return _outgoing.empty();
     }
 
-    inline void dequeueOutgoing(MidiMessage* msg) {
+    inline bool dequeueOutgoing(MidiMessage* msg) {
+        if(outgoingIsEmpty()) {
+            return false;
+        }
         _outgoing.read(msg, 1);
+        return true;
     }
 
     inline void enqueueIncoming(MidiMessage &msg) {
@@ -43,21 +48,22 @@ public:
         return _incoming.empty();
     }
 
-    inline void dequeueIncoming(MidiMessage* msg) {
+    inline bool dequeueIncoming(MidiMessage* msg) {
+        if(incomingIsEmpty()) {
+            return false;
+        }
         _incoming.read(msg, 1);
+        return true;
     }
 
     inline void processOutgoing() {
         MidiMessage msg;
         uint8_t ret; // USBD_StatusTypeDef
-        while(!outgoingIsEmpty()) {
-            dequeueOutgoing(&msg);
-            //MidiMessage::dump(msg);
+        while(dequeueOutgoing(&msg)) {
             MidiUSBMessage umsg(0, msg);
             //MidiUSBMessage::dump(umsg);
-            //printf("processOutgoing: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", umsg.getData()[0], umsg.getData()[1], umsg.getData()[2], umsg.getData()[3]);
             do {
-                ret = MIDI_sendMessage(umsg.getData(), 4);
+                ret = USBD_MIDI_fops_FS.Send(umsg.getData(), 4);
             } while(ret != USBD_OK);
         }
     }

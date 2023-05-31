@@ -185,6 +185,7 @@ static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t Len)
 {
   /* USER CODE BEGIN 6 */
+  
   //uint8_t chan = Buf[1] & 0xf;
   //uint8_t msgtype = Buf[1] & 0xf0;
   //uint8_t b1 =  Buf[2];
@@ -209,6 +210,12 @@ static int8_t MIDI_Receive_FS(uint8_t* Buf, uint32_t Len)
 static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
 {
   uint8_t ret = USBD_OK;
+  
+  //uint8_t cable = buffer[0];
+  //uint8_t message = buffer[1];
+  //uint8_t param1 = buffer[2];
+  //uint8_t param2 = buffer[3];
+  //printf("MIDI_Send_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
 
   USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, buffer, length);
 
@@ -216,48 +223,6 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
 
   return (ret);
 }
-
-int8_t MIDI_sendMessage(uint8_t* msg, uint8_t length) {
-  //uint8_t cable = msg[0];
-  //uint8_t message = msg[1];
-  //uint8_t param1 = msg[2];
-  //uint8_t param2 = msg[3];
-  //printf("MIDI_sendMessage: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
-  return MIDI_Send_FS(msg, length);
-}
-
-//void MIDI_note_on(uint8_t note, uint8_t velocity) {
-//    uint8_t b[4];
-//    b[0] = 0x0B;
-//    b[1] = 0x90;
-//    b[2] = note;
-//    b[3] = velocity;
-//
-//    MIDI_Send_FS(b, 4);
-//
-//}
-//
-//void MIDI_note_off(uint8_t note, uint8_t velocity) {
-//    uint8_t b[4];
-//    b[0] = 0x0B;
-//    b[1] = 0x80;
-//    b[2] = note;
-//    b[3] = velocity;
-//
-//    MIDI_Send_FS(b, 4);
-//
-//}
-//
-//void MIDI_cc_update(uint8_t channel , uint8_t controler_number, uint8_t controller_value) {
-//    uint8_t b[4];
-//    b[0] = 0x0B;
-//    b[1] = 0xB0 | channel;
-//    b[2] = controler_number;
-//    b[3] = controller_value;
-//
-//    MIDI_Send_FS(b, 4);
-//
-//}
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

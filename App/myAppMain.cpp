@@ -17,9 +17,9 @@ void projectMain() {
 
     while(true) {
         while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin)) {
-          while(!midiHandler.incomingIsEmpty()) {
-            MidiMessage msg;
-            midiHandler.dequeueIncoming(&msg);
+
+          MidiMessage msg;
+          while(midiHandler.dequeueIncoming(&msg)) {
             printf("Midi Receive: ");
             MidiMessage::dump(msg);
 
