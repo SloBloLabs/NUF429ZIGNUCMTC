@@ -218,11 +218,11 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
 }
 
 int8_t MIDI_sendMessage(uint8_t* msg, uint8_t length) {
-  uint8_t cable = msg[0];
-  uint8_t message = msg[1];
-  uint8_t param1 = msg[2];
-  uint8_t param2 = msg[3];
-  printf("MIDI_sendMessage: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
+  //uint8_t cable = msg[0];
+  //uint8_t message = msg[1];
+  //uint8_t param1 = msg[2];
+  //uint8_t param2 = msg[3];
+  //printf("MIDI_sendMessage: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
   return MIDI_Send_FS(msg, length);
 }
 

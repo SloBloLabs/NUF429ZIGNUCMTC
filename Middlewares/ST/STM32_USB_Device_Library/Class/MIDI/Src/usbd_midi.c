@@ -957,7 +957,7 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   USBD_MIDI_HandleTypeDef *hmidi;
   //PCD_HandleTypeDef *hpcd = (PCD_HandleTypeDef *)pdev->pData;
 
-  printf("MIDI DATA IN\n");
+  //printf("MIDI DATA IN\n");
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
   MIDIInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK);
@@ -1122,7 +1122,7 @@ uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
 {
   USBD_MIDI_HandleTypeDef *hmidi;
   
-  printf("MIDI SET TX BUFFER\n");
+  //printf("MIDI SET TX BUFFER\n");
   
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
@@ -1154,7 +1154,7 @@ uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
   USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
   USBD_StatusTypeDef ret = USBD_BUSY;
 
-  printf("MIDI TRANSMIT PACKET\n");
+  //printf("MIDI TRANSMIT PACKET\n");
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
@@ -1174,14 +1174,14 @@ uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
     //pdev->ep_in[MIDIInEpAdd & 0xFU].total_length = hmidi->TxLength;
     pdev->ep_in[MIDIInEpAdd & 0xFU].total_length = hmidi->tx_length;
 
-    printf("MIDI NOT BUSY\n");
+    //printf("MIDI NOT BUSY\n");
     /* Transmit next packet */
     //(void)USBD_LL_Transmit(pdev, MIDIInEpAdd, hmidi->TxBuffer, hmidi->TxLength);
     (void)USBD_LL_Transmit(pdev, MIDIInEpAdd, hmidi->tx_buffer, hmidi->tx_length);
 
     ret = USBD_OK;
   } else {
-    printf("MIDI BUSY\n");
+    //printf("MIDI BUSY\n");
     ret = USBD_BUSY;
   }
 

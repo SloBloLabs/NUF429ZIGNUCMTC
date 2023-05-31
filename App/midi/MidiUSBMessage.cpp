@@ -1,20 +1,16 @@
 #include "MidiUSBMessage.h"
 
 MidiUSBMessage::MidiUSBMessage(uint8_t *data) {
-    memcpy(_data, data, 4);
+    memcpy(_raw, data, 4);
 }
 
-MidiUSBMessage::MidiUSBMessage(const uint8_t cableNumber, MidiMessage &message) {
-    ChannelIndexNumber cin = getChannelIndexNumber(message.channelMessage());
-    MidiUSBMessage(cableNumber, cin, message);
-}
+MidiUSBMessage::MidiUSBMessage(const uint8_t cableNumber, MidiMessage &midiMessage) :
+        MidiUSBMessage(cableNumber, getChannelIndexNumber(midiMessage.channelMessage()), midiMessage) {}
 
-MidiUSBMessage::MidiUSBMessage(const uint8_t cableNumber, const uint8_t codeIndexNumber, MidiMessage &midiMessage) {
+MidiUSBMessage::MidiUSBMessage(const uint8_t cableNumber, const uint8_t codeIndexNumber, MidiMessage &midiMessage) :
+        _raw{0, midiMessage.status(), midiMessage.data0(), midiMessage.data1()} {
     setCableNumber(cableNumber);
     setCodeIndexNumber(codeIndexNumber);
-    _data[1] = midiMessage.status();
-    _data[2] = midiMessage.data0();
-    _data[3] = midiMessage.data1();
 }
 
 ChannelIndexNumber MidiUSBMessage::getChannelIndexNumber(MidiMessage::ChannelMessage status) {
@@ -46,4 +42,8 @@ ChannelIndexNumber MidiUSBMessage::getChannelIndexNumber(MidiMessage::ChannelMes
         break;
     }
     return ret;
+}
+
+void MidiUSBMessage::dump(const MidiUSBMessage &msg) {
+    printf("DumpUSBMessage: data0: %02x, data1: %02x, data2: %02x, data3: %02x \n", msg._raw[0], msg._raw[1], msg._raw[2], msg._raw[3]);
 }

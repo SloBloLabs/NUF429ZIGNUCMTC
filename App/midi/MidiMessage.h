@@ -326,8 +326,10 @@ public:
 
     MidiMessage(const uint8_t *raw /*, size_t length*/) {
         _raw[0] = raw[0];
-        _raw[1] = length() > 1 ? raw[1] : 0;
-        _raw[2] = length() > 2 ? raw[2] : 0;
+        // only calculate once
+        uint8_t len = length();
+        _raw[1] = len > 0 ? raw[1] : 0;
+        _raw[2] = len > 1 ? raw[2] : 0;
         //_length = std::min(size_t(2), length);
     }
 

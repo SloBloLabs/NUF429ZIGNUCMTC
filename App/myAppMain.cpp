@@ -20,6 +20,7 @@ void projectMain() {
           while(!midiHandler.incomingIsEmpty()) {
             MidiMessage msg;
             midiHandler.dequeueIncoming(&msg);
+            printf("Midi Receive: ");
             MidiMessage::dump(msg);
 
             LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
@@ -27,14 +28,15 @@ void projectMain() {
         }
 
         LL_GPIO_ResetOutputPin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-        for(uint8_t i = 0; i < 20; ++i) {
+        for(uint8_t i = 0; i < 2; ++i) {
             LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
             uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
-            printf("loop %d\n", i);
+            //printf("loop %d\n", i);
             uint8_t midiChannel = 5;
             MidiMessage msg = pinSet ?
                 MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
                 MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
+            printf("Midi Send: ");
             MidiMessage::dump(msg);
             midiHandler.enqueueOutgoing(msg);
             midiHandler.processOutgoing();

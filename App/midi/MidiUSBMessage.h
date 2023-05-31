@@ -1,23 +1,9 @@
 #pragma once
 
 #include "MidiMessage.h"
+#include "swvPrint.h"
 
 // CIN
-//#define MIDI_CIN_SYSCOMMON_2BYTES          0x02
-//#define MIDI_CIN_SYSCOMMON_3BYTES          0x03
-//#define MIDI_CIN_SYSEX_START_OR_CONTINUE   0x04
-//#define MIDI_CIN_SYSEX_END_1BYTE           0x05
-//#define MIDI_CIN_SYSEX_END_2BYTES          0x06
-//#define MIDI_CIN_SYSEX_END_3BYTES          0x07
-//#define MIDI_CIN_NOTE_OFF                  0x08
-//#define MIDI_CIN_NOTE_ON                   0x09
-//#define MIDI_CIN_POLYPHONIC_KEY_PRESSURE   0x0A
-//#define MIDI_CIN_CONTROL_CHANGE            0x0B
-//#define MIDI_CIN_PROGRAM_CHANGE            0x0C
-//#define MIDI_CIN_CHANNEL_PRESSURE          0x0D
-//#define MIDI_CIN_PITCH_BEND                0x0E
-//#define MIDI_CIN_SYS_REALTIME              0x0F
-
 enum ChannelIndexNumber {
     INVALID                 = 0x00,
     SYSCOMMON_2BYTES        = 0x02,
@@ -82,35 +68,38 @@ public:
     ~MidiUSBMessage() = default;
 
     inline uint8_t cableNumber() const {
-        return (_data[0] >> 4) & 0x0F;
+        return (_raw[0] >> 4) & 0x0F;
     }
 
     inline void setCableNumber(const uint8_t cableNumber) {
-        _data[0] = (cableNumber << 4) | (_data[0] & 0x0F);
+        _raw[0] = (cableNumber << 4) | (_raw[0] & 0x0F);
     }
 
     inline uint8_t codeIndexNumber() const {
-        return _data[0] & 0x0F;
+        return _raw[0] & 0x0F;
     }
 
     inline void setCodeIndexNumber(const uint8_t cin) {
-        _data[0] = (cin & 0x0F) | (_data[0] & 0xF0);
+        _raw[0] = (cin & 0x0F) | (_raw[0] & 0xF0);
     }
 
     inline void getMidiMessage(MidiMessage &midiMessage) const {
-        midiMessage = MidiMessage(&_data[1]);
+        MidiMessage msg(&_raw[1]);
+        midiMessage = msg;
     }
 
     inline uint8_t midiChannel() const {
-        return _data[1] & 0x0F;
+        return _raw[1] & 0x0F;
     }
 
     inline uint8_t* getData() {
-        return _data;
+        return _raw;
     }
+
+    static void dump(const MidiUSBMessage &msg);
 
 private:
     static ChannelIndexNumber getChannelIndexNumber(MidiMessage::ChannelMessage status);
 
-    uint8_t _data[4];
+    uint8_t _raw[4];
 };

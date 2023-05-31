@@ -52,8 +52,10 @@ public:
         uint8_t ret; // USBD_StatusTypeDef
         while(!outgoingIsEmpty()) {
             dequeueOutgoing(&msg);
-            MidiMessage::dump(msg);
+            //MidiMessage::dump(msg);
             MidiUSBMessage umsg(0, msg);
+            //MidiUSBMessage::dump(umsg);
+            //printf("processOutgoing: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", umsg.getData()[0], umsg.getData()[1], umsg.getData()[2], umsg.getData()[3]);
             do {
                 ret = MIDI_sendMessage(umsg.getData(), 4);
             } while(ret != USBD_OK);
