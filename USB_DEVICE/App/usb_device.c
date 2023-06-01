@@ -23,12 +23,9 @@
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
-//#include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
-//#include "usbd_dfu.h"
 #include "usbd_dfu_if.h"
-//#include "usbd_audio.h"
-#include "usbd_audio_if.h"
+#include "usbd_midi_if.h"
 
 /* USER CODE BEGIN Includes */
 #include "usbd_composite_builder.h"
@@ -84,7 +81,7 @@ void MX_USB_DEVICE_Init(void)
 //    Error_Handler();
 //  }
 #if USBD_CMPSIT_ACTIVATE_AUDIO == 1
-  if (USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_AUDIO, CLASS_TYPE_AUDIO, &AUDIO_EpAdd) != USBD_OK)
+  if (USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_MIDI, CLASS_TYPE_AUDIO, &AUDIO_EpAdd) != USBD_OK)
   {
     Error_Handler();
   }
@@ -92,7 +89,7 @@ void MX_USB_DEVICE_Init(void)
   /* Add Interface callbacks for AUDIO Class */
   if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_AUDIO, 0) != 0xFF)
   {
-    if (USBD_AUDIO_RegisterInterface(&hUsbDeviceFS, &USBD_AUDIO_fops_FS) != USBD_OK)
+    if (USBD_MIDI_RegisterInterface(&hUsbDeviceFS, &USBD_MIDI_fops_FS) != USBD_OK)
     {
       Error_Handler();
     }

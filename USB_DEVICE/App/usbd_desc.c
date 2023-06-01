@@ -24,7 +24,7 @@
 #include "usbd_conf.h"
 
 /* USER CODE BEGIN INCLUDE */
-#include "usbd_composite_builder.h"
+
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,19 +62,19 @@
   * @{
   */
 
-#define USBD_VID                      1155
-#define USBD_LANGID_STRING            1033
-#define USBD_MANUFACTURER_STRING      "STMicroelectronics"
-#if (USBD_CMPSIT_ACTIVATE_CDC == 1)
-#define USBD_PID_FS                   57105 // for DFU PID must be 57105, ST proprietary modification
+#define USBD_VID                     1155
+#define USBD_LANGID_STRING           1033
+#define USBD_MANUFACTURER_STRING     "SloBlo Labs"
+#if (USBD_CMPSIT_ACTIVATE_DFU == 1)
+#define USBD_PID_FS                  57105 // TODO: for DFU PID must be 57105, ST proprietary modification
 #else
-#define USBD_PID_FS                   21156
+#define USBD_PID_FS                  21156
 #endif
-#define USBD_PRODUCT_STRING_FS        "STM32 COMPOSITE DEVICE"
-#define USBD_CONFIGURATION_STRING_FS  "CONFIGURATION 0"
-#define USBD_INTERFACE_STRING_FS      "COMPOSITE INTERFACE"
+#define USBD_PRODUCT_STRING_FS       "S54 Composite USB Device"
+#define USBD_CONFIGURATION_STRING_FS "S54 Composite Config"
+#define USBD_INTERFACE_STRING_FS     "S54 Composite Interface"
 
-#define USB_SIZ_BOS_DESC            0x0C
+#define USB_SIZ_BOS_DESC             0x0C
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 

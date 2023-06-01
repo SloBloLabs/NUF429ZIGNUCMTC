@@ -513,7 +513,7 @@ USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   }
 #else
   /* Clear configuration  and De-initialize the Class process */
-  if(pdef->pClass[0] != NULL) {
+  if(pdev->pClass[0] != NULL) {
     if (pdev->pClass[0]->DeInit(pdev, cfgidx) != 0U)
     {
       ret = USBD_FAIL;

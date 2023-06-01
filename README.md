@@ -51,3 +51,8 @@ Upload to github
  - git branch -M main
  - git remote add origin https://github.com/SloBloLabs/<"ProjectRepo">.git
  - git push -u origin main
+
+---
+
+Merge 2 branches without committing:
+git merge --no-commit --no-ff <other branch>
