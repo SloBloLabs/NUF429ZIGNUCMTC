@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include  "usbd_ioreq.h"
+#include "usbd_ioreq.h"
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
@@ -40,6 +40,9 @@ extern "C" {
 /** @defgroup USBD_MIDI_Exported_Defines
   * @{
   */
+
+#define MIDI_IN_PORTS_NUM              0x01
+#define MIDI_OUT_PORTS_NUM             0x01
 
 #define USB_MIDI_CLASS_DESC_SHIFT      18
 #define USB_MIDI_DESC_SIZE             7
@@ -122,10 +125,6 @@ extern "C" {
 #define MIDI_JACK_63    0x3f
 #define MIDI_JACK_64    0x40
 
-#ifndef USBD_MAX_NUM_INTERFACES
-#define USBD_MAX_NUM_INTERFACES                       1U
-#endif /* USBD_MIDI_FREQ */
-
 #ifndef MIDI_HS_BINTERVAL
 #define MIDI_HS_BINTERVAL                            0x01U
 #endif /* MIDI_HS_BINTERVAL */
@@ -144,6 +143,17 @@ extern "C" {
 
 #define USB_DEVICE_CLASS_AUDIO                       0x01U
 #define AUDIO_SUBCLASS_MIDISTREAMING                 0x03U
+#define AUDIO_PROTOCOL_UNDEFINED                     0x00U
+#define AUDIO_HEADER_MIDISTREAMING                   0x01U
+
+#define JACK_TYPE_EMBEDDED                           0x01U
+#define JACK_TYPE_EXTERNAL                           0x02U
+
+#define MIDI_IN_JACK                                 0x02U
+#define MIDI_OUT_JACK                                0x03U
+#define CS_INTERFACE                                 0x24U
+#define CS_ENDPOINT                                  0x25U
+#define EP_MIDISTREAMING_GENERAL                     0x01U
 
 /**
   * @}
@@ -169,6 +179,71 @@ typedef struct
   int8_t (*Receive) (uint8_t* pbuf, uint32_t size);
   int8_t (*Send)    (uint8_t* pbuf, uint32_t size);
 } USBD_MIDI_ItfTypeDef;
+
+
+/*
+ * MIDI Class specification release 1.0
+ * https://www.usb.org/sites/default/files/midi10.pdf
+ */
+
+// Table 6-2: Class-Specific MS Interface Header Descriptor
+typedef struct
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint16_t bcdMSC;
+  uint16_t wTotalLength;
+} __PACKED USBD_MidiIfHeaderDesc;
+
+// Table 6-3: MIDI IN Jack Descriptor
+typedef struct
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t bJackType;
+  uint8_t bJackID;
+  uint8_t iJack;
+} __PACKED USBD_MidiInJackDesc;
+
+// Table 6-4: MIDI OUT Jack Descriptor
+typedef struct
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t bJackType;
+  uint8_t bJackID;
+  uint8_t bNrInputPins;
+  uint8_t baSourceID1;
+  uint8_t BaSourcePin1;
+  uint8_t iJack;
+} __PACKED USBD_MidiOutJackDesc;
+
+// Table 6-6: Standard MidiStreaming Bulk Data Endpoint Descriptor
+typedef struct
+{
+  uint8_t  bLength;
+  uint8_t  bDescriptorType;
+  uint8_t  bEndpointAddress;
+  uint8_t  bmAttributes;
+  uint16_t wMaxPacketSize;
+  uint8_t  bInterval;
+  uint8_t  bRefresh;
+  uint8_t  bSynchAddress;
+} __PACKED USBD_MidiStreamingStandartEPDesc;
+
+// Table 6-7: Class-specific MidiStreaming Bulk Data Endpoint Descriptor
+typedef struct
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubType;
+  uint8_t bNumEmbMIDIJack;
+  uint8_t baAssocJackID1;
+} __PACKED USBD_MidiStreamingClassEPDesc;
+
 
 /** @defgroup USBD_CORE_Exported_Macros
   * @{

@@ -334,8 +334,8 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   0x00,                         /*nInterfaceProtocol : Unused*/
   0x00,                         /*iInterface: 0*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 21 Table 6-2: Class-Specific MS Interface Header Descriptor
   /******************** MIDI Adapter Class-specific MS Interface Descriptor ********************/
-  /* USB_MIDI_CLASS_DESC_SHIFT */
   0x07,                 /*bLength: Descriptor size*/
   0x24,                 /*bDescriptorType: CS_INTERFACE descriptor*/
   0x01,                 /*bDescriptorSubtype: MS_HEADER subtype*/
@@ -344,6 +344,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   USB_MIDI_REPORT_DESC_SIZE,
   0x00,                  /*wTotalLength: Total size of class-specific descriptors*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 22 Table 6-3: MIDI IN Jack Descriptor
 #if MIDI_IN_PORTS_NUM >= 1
   /******************** MIDI Adapter MIDI IN Jack Descriptor (External) ********************/
   0x06,                   /*bLength: Size of this descriptor, in bytes*/
@@ -353,6 +354,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   MIDI_JACK_1,            /*bJackID: ID of this Jack.*/
   0x00,                   /*iJack: Unused.*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 22 Table 6-4: MIDI OUT Jack Descriptor
   /******************** MIDI Adapter MIDI OUT Jack Descriptor (Embedded) ********************/
   0x09,                   /*bLength: Size of this descriptor, in bytes*/
   0x24,                   /*bDescriptorType: CS_INTERFACE descriptor.*/
@@ -512,6 +514,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   0x00,                   /*iJack: Unused.*/
 #endif
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 22 Table 6-3: MIDI IN Jack Descriptor
 #if MIDI_OUT_PORTS_NUM >= 1
   /******************** MIDI Adapter MIDI IN Jack Descriptor (Embedded) ********************/
   0x06,                   /*bLength: Size of this descriptor, in bytes*/
@@ -521,6 +524,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   MIDI_JACK_17,           /*bJackID: ID of this Jack.*/
   0x00,                   /*iJack: Unused.*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 22 Table 6-4: MIDI OUT Jack Descriptor
   /******************** MIDI Adapter MIDI OUT Jack Descriptor (External) ********************/
   0x09,                   /*bLength: Size of this descriptor, in bytes*/
   0x24,                   /*bDescriptorType: CS_INTERFACE descriptor.*/
@@ -680,17 +684,19 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   0x00,                   /*iJack: Unused.*/
 #endif
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 25 Table 6-6: Standard MS Bulk Data Endpoint Descriptor
   /******************** MIDI Adapter Standard Bulk OUT Endpoint Descriptor ********************/
   0x09,                   /*bLength: Size of this descriptor, in bytes*/
   USB_DESC_TYPE_ENDPOINT, /*bDescriptorType: ENDPOINT descriptor.*/
   MIDI_OUT_EP,            /*bEndpointAddress: OUT Endpoint 1.*/
-  0x02,                   /*bmAttributes: Bulk, not shared.*/
+  USBD_EP_TYPE_BULK,      /*bmAttributes: Bulk, not shared.*/
   USB_FS_MAX_PACKET_SIZE, 
   0x00,                   /*wMaxPacketSize*/
   0x00,                   /*bInterval: Ignored for Bulk. Set to zero.*/
   0x00,                   /*bRefresh: Unused.*/
   0x00,                   /*bSynchAddress: Unused.*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 26 Table 6-7: Class-specific MS Bulk Data Endpoint Descriptor
   /******************** MIDI Adapter Class-specific Bulk OUT Endpoint Descriptor ********************/
   (4 + MIDI_OUT_PORTS_NUM), /*bLength: Size of this descriptor, in bytes*/
   0x25,                     /*bDescriptorType: CS_ENDPOINT descriptor*/
@@ -721,6 +727,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   MIDI_JACK_31,             /*BaAssocJackID(8): ID of the Embedded MIDI IN Jack.*/
 #endif
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 25 Table 6-6: Standard MS Bulk Data Endpoint Descriptor
   /******************** MIDI Adapter Standard Bulk IN Endpoint Descriptor ********************/
   0x09,                    /*bLength: Size of this descriptor, in bytes*/
   USB_DESC_TYPE_ENDPOINT,  /*bDescriptorType: ENDPOINT descriptor.*/
@@ -732,6 +739,7 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
   0x00,                    /*bRefresh: Unused.*/
   0x00,                    /*bSynchAddress: Unused.*/
 
+// https://www.usb.org/sites/default/files/midi10.pdf Page 26 Table 6-7: Class-specific MS Bulk Data Endpoint Descriptor
   /******************** MIDI Adapter Class-specific Bulk IN Endpoint Descriptor ********************/
   (4 + MIDI_IN_PORTS_NUM), /*bLength: Size of this descriptor, in bytes*/
   0x25,                    /*bDescriptorType: CS_ENDPOINT descriptor*/

@@ -75,8 +75,7 @@
   */
 
 /* USER CODE BEGIN EXPORTED_MACRO */
-#define MIDI_IN_PORTS_NUM              0x01
-#define MIDI_OUT_PORTS_NUM             0x01
+
 /* USER CODE END EXPORTED_MACRO */
 
 /**
