@@ -269,13 +269,18 @@ extern USBD_ClassTypeDef USBD_MIDI;
   */
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev,
                                      USBD_MIDI_ItfTypeDef *fops);
+
+#ifdef USE_USBD_COMPOSITE
+uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
+                              uint8_t  *buff,
+                              uint16_t length,
+                              uint8_t ClassId);
+uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev, uint8_t ClassId);
+#else
 uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
                               uint8_t  *buff,
                               uint16_t length);
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev);
-
-#ifdef USE_USBD_COMPOSITE
-uint32_t USBD_MIDI_GetEpPcktSze(USBD_HandleTypeDef *pdev, uint8_t If, uint8_t Ep);
 #endif /* USE_USBD_COMPOSITE */
 
 /**

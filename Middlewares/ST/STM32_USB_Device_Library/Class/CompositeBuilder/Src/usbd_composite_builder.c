@@ -1943,7 +1943,7 @@ uint32_t  USBD_CMPSIT_SetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTy
   * @param  Instance: Instance number of the class (0 if first/unique instance, >0 otherwise)
   * @retval The Class ID (this function does not set the pdev->classId field.
   */
-uint32_t  USBD_CMPSIT_GetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTypeDef Class, uint32_t Instance)
+uint32_t USBD_CMPSIT_GetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTypeDef Class, uint32_t Instance)
 {
   uint32_t idx;
   uint32_t inst = 0U;

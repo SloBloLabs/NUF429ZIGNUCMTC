@@ -101,6 +101,7 @@
   */
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
+extern uint32_t USBD_CMPSIT_GetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTypeDef Class, uint32_t Instance);
 
 void enqueueIncomingMidi(uint8_t *data);
 
@@ -216,11 +217,16 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
   //uint8_t param1 = buffer[2];
   //uint8_t param2 = buffer[3];
   //printf("MIDI_Send_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
+#ifdef USE_USBD_COMPOSITE
+  uint32_t classId = USBD_CMPSIT_GetClassID(&hUsbDeviceFS, CLASS_TYPE_AUDIO, 0);
+  USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, buffer, length, classId);
 
+  ret = USBD_MIDI_TransmitPacket(&hUsbDeviceFS, classId);
+#else
   USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, buffer, length);
 
   ret = USBD_MIDI_TransmitPacket(&hUsbDeviceFS);
-
+#endif /* USE_USBD_COMPOSITE */
   return (ret);
 }
 
