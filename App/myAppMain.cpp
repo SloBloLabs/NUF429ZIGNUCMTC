@@ -8,13 +8,32 @@
 
 MidiHandler midiHandler;
 
+void cdcTest();
+void midiTest();
+
 void projectMain() {
     // Configure and enable Systick timer including interrupt
     SysTick_Config(SystemCoreClock / 1000 - 1);
 
-    midiHandler.init();
+    cdcTest();
+    //midiTest();
 
+}
+
+void cdcTest() {
     char const *data = "Hello from NUF429ZIGNUCMTC\n";
+
+    while(true) {
+        while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin));
+
+        CDC_Transmit_FS((uint8_t*)data, strlen(data));
+        LL_mDelay(100);
+    }
+}
+
+void midiTest() {
+
+    midiHandler.init();
 
     while(true) {
         while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin)) {
@@ -90,7 +109,6 @@ void projectMain() {
             MidiMessage::dump(msg);
             midiHandler.enqueueOutgoing(msg);
             midiHandler.processOutgoing();
-            CDC_Transmit_FS((uint8_t*)data, strlen(data));
             LL_mDelay(100);
         }
     }

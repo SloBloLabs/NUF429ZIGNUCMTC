@@ -110,6 +110,7 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
   */
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
+extern uint32_t USBD_CMPSIT_GetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTypeDef Class, uint32_t Instance);
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
@@ -265,6 +266,8 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+  printf("CDC Receive: %s\n", Buf);
+  CDC_Transmit_FS(Buf, *Len);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
   /* USER CODE END 6 */
@@ -285,12 +288,16 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
-    return USBD_BUSY;
-  }
-  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len, hUsbDeviceFS.classId);
-  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS, hUsbDeviceFS.classId);
+  uint32_t classId = 0U;
+#ifdef USE_USBD_COMPOSITE
+  classId = USBD_CMPSIT_GetClassID(&hUsbDeviceFS, CLASS_TYPE_CDC, 0);
+#endif
+  //USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
+  //if (hcdc->TxState != 0){
+  //  return USBD_BUSY;
+  //}
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len, classId);
+  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS, classId);
   /* USER CODE END 7 */
   return result;
 }
