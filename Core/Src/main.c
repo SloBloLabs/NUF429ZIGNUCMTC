@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "myAppMain.hpp"
+#include "myAppMain.h"
 #include <stdio.h>
 /* USER CODE END Includes */
 

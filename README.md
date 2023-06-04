@@ -51,3 +51,46 @@ Upload to github
  - git branch -M main
  - git remote add origin https://github.com/SloBloLabs/<"ProjectRepo">.git
  - git push -u origin main
+
+---
+
+Merge 2 branches without committing:
+git merge --no-commit --no-ff <other branch>
+
+---
+
+Composite USB interface:
+
+3 configurations
+4 interfaces
+6 endpoints
+
+configuration 1:
+ - CDC
+ - 2 interfaces
+   - 0: communications control
+     - 1 endpoint 0x82
+   - 1: communications data
+     - 2 endpoints 0x01 + 0x81 (BULK)
+ - 4 endpoints overall
+   - EP0
+   - EP1
+   - EP2 (in only: 0x82)
+
+configuration 2:
+ - DFU
+ - 1 interface
+   - 0: application specific/DFU
+ - 1 endpoint overall
+   - EP0 only
+
+configuration 3:
+ - MIDI
+ - 1 interface
+   - 0: Audio/Streaming
+     - 2 endpoints 0x02 + 0x83 (BULK)
+ - 3 endpoints overall
+   - EP0
+   - EP2 (out only: 0x02)
+   - EP3 (in only: 0x83)
+

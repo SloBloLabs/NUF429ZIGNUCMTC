@@ -56,7 +56,8 @@ extern "C" {
 #endif /* USBD_CMPSIT_ACTIVATE_CDC_ECM */
 
 #if USBD_CMPSIT_ACTIVATE_AUDIO == 1
-#include "usbd_audio.h"
+//#include "usbd_audio.h"
+#include "usbd_midi.h"
 #endif /* USBD_CMPSIT_ACTIVATE_AUDIO */
 
 #if USBD_CMPSIT_ACTIVATE_CUSTOMHID == 1
