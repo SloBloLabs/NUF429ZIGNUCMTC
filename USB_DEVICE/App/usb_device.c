@@ -34,7 +34,7 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 uint8_t CDC_EpAdd[3] = {CDC_CMP_IN_EP, CDC_CMP_OUT_EP, CDC_CMP_CMD_EP}; /* CDC Endpoint Adress First Instance */
-uint8_t MIDI_EpAdd[2] = {MIDI_CMP_OUT_EP, MIDI_CMP_IN_EP};    /* MIDI Endpoint Adress */
+uint8_t MIDI_EpAdd[2] = {MIDI_CMP_OUT_EP, MIDI_CMP_IN_EP};              /* MIDI Endpoint Adress */
 /* USER CODE END PV */
 
 /* USER CODE BEGIN PFP */

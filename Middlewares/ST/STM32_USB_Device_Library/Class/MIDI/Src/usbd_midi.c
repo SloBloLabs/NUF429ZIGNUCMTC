@@ -86,7 +86,7 @@ EndBSPDependencies */
   */
 static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_MIDI_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
-//static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
+static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 //static uint8_t USBD_MIDI_EP0_TxReady(USBD_HandleTypeDef *pdev);
 //static uint8_t USBD_MIDI_EP0_RxReady(USBD_HandleTypeDef *pdev);
 static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
@@ -108,7 +108,7 @@ USBD_ClassTypeDef USBD_MIDI =
 {
   USBD_MIDI_Init,
   USBD_MIDI_DeInit,
-  NULL, //USBD_MIDI_Setup,
+  USBD_MIDI_Setup,
   NULL, //USBD_MIDI_EP0_TxReady,
   NULL, //USBD_MIDI_EP0_RxReady,
   USBD_MIDI_DataIn,
@@ -304,6 +304,21 @@ USBD_ClassTypeDef USBD_MIDI =
 //};
 
 #ifndef USE_USBD_COMPOSITE
+/* USB Standard Device Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_MIDI_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
+{
+  USB_LEN_DEV_QUALIFIER_DESC,
+  USB_DESC_TYPE_DEVICE_QUALIFIER,
+  0x00,
+  0x02,
+  0x00,
+  0x00,
+  0x00,
+  0x40,
+  0x01,
+  0x00,
+};
+
 /* USB MIDI device Configuration Descriptor */
 __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIGN_END =
 {
@@ -769,27 +784,13 @@ __ALIGN_BEGIN static uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZE] __ALIG
 #if MIDI_IN_PORTS_NUM >= 8
   MIDI_JACK_16,            /*BaAssocJackID(8): ID of the Embedded MIDI OUT Jack.*/
 #endif
-
-};
-
-/* USB Standard Device Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_MIDI_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
-{
-  USB_LEN_DEV_QUALIFIER_DESC,
-  USB_DESC_TYPE_DEVICE_QUALIFIER,
-  0x00,
-  0x02,
-  0x00,
-  0x00,
-  0x00,
-  0x40,
-  0x01,
-  0x00,
 };
 #endif /* USE_USBD_COMPOSITE  */
 
 static uint8_t MIDIInEpAdd  = MIDI_IN_EP;
 static uint8_t MIDIOutEpAdd = MIDI_OUT_EP;
+
+static USBD_MIDI_HandleTypeDef midiHandle;
 
 /**
   * @}
@@ -810,10 +811,11 @@ static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   USBD_MIDI_HandleTypeDef *hmidi;
 
-  //printf("MIDI INIT\n");
+  printf("MIDI INIT, class id = %ld\n", pdev->classId);
 
   /* Allocate Midi structure */
-  hmidi = (USBD_MIDI_HandleTypeDef *)USBD_malloc(sizeof(USBD_MIDI_HandleTypeDef));
+  //hmidi = (USBD_MIDI_HandleTypeDef *)USBD_malloc(sizeof(USBD_MIDI_HandleTypeDef));
+  hmidi = &midiHandle;
 
   if(hmidi == NULL)
   {
@@ -831,6 +833,8 @@ static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   MIDIInEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_IN, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
   MIDIOutEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, (uint8_t)pdev->classId);
 #endif /* USE_USBD_COMPOSITE */
+
+  //printf("MIDI In EP: %02x, Out EP: %02x\n", MIDIInEpAdd, MIDIOutEpAdd);
 
   if (pdev->dev_speed == USBD_SPEED_HIGH)
   {
@@ -875,7 +879,7 @@ static uint8_t USBD_MIDI_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 static uint8_t USBD_MIDI_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
   
-  //printf("MIDI DEINIT\n");
+  printf("MIDI DEINIT\n");
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
@@ -905,22 +909,22 @@ static uint8_t USBD_MIDI_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   return (uint8_t)USBD_OK;
 }
 
-///**
-//  * @brief  USBD_MIDI_Setup
-//  *         Handle the MIDI specific requests
-//  * @param  pdev: instance
-//  * @param  req: usb requests
-//  * @retval status
-//  */
-//static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev,
-//                                USBD_SetupReqTypedef *req)
-//{
-//  USBD_StatusTypeDef ret = USBD_OK;
-//
-//  printf("MIDI SETUP\n");
-//
-//  return (uint8_t)ret;
-//}
+/**
+  * @brief  USBD_MIDI_Setup
+  *         Handle the MIDI specific requests
+  * @param  pdev: instance
+  * @param  req: usb requests
+  * @retval status
+  */
+static uint8_t USBD_MIDI_Setup(USBD_HandleTypeDef *pdev,
+                                USBD_SetupReqTypedef *req)
+{
+  USBD_StatusTypeDef ret = USBD_OK;
+
+  printf("MIDI SETUP\n");
+
+  return (uint8_t)ret;
+}
 
 #ifndef USE_USBD_COMPOSITE
 /**
@@ -963,15 +967,15 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
 
   USBD_MIDI_HandleTypeDef *hmidi;
-  
-  //printf("MIDI DATA IN\n");
 
-  hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  //hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  hmidi = &midiHandle;
 
   if (hmidi == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
+  printf("MIDI DATA IN, hmidi=%ld, midi busy = %d\n", (uint32_t)hmidi, hmidi->tx_busy);
 
 #ifdef USE_USBD_COMPOSITE
   /* Get the Endpoints addresses allocated for this class instance */
@@ -993,6 +997,7 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   if(epnum == (MIDIInEpAdd & 0x7F)) // TODO: check why epnum does not come as 0x81 as expected
   {
     hmidi->tx_busy = 0;
+    printf("MIDI DATA IN, hmidi=%ld, midi busy = %d\n", (uint32_t)hmidi, hmidi->tx_busy);
     
     //uint8_t *tx_buffer = hmidi->tx_buffer;
     //((USBD_MIDI_ItfTypeDef *)pdev->pUserData)->Send(tx_buffer, length);
@@ -1045,9 +1050,10 @@ static uint8_t USBD_MIDI_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
   USBD_MIDI_HandleTypeDef *hmidi;
   
-  // printf("MIDI DATA OUT\n");
+  //printf("MIDI DATA OUT\n");
 
-  hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  //hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
+  hmidi = &midiHandle;
 
   if(hmidi == NULL)
   {
@@ -1106,7 +1112,7 @@ uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev,
                                      USBD_MIDI_ItfTypeDef *fops)
 {
   
-  // printf("MIDI REGISTER INTERFACE\n");
+  //printf("MIDI REGISTER INTERFACE\n");
 
   if (fops == NULL)
   {
@@ -1130,7 +1136,8 @@ uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
                               uint16_t length,
                               uint8_t ClassId)
 {
-  USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[ClassId];
+  //USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[ClassId];
+  USBD_MIDI_HandleTypeDef *hmidi = &midiHandle;
 #else
 uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
                               uint8_t *buff,
@@ -1139,17 +1146,17 @@ uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
   USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[pdev->classId];
 #endif
 
-  //printf("MIDI SET TX BUFFER\n");
+  printf("MIDI SET TX BUFFER, *hmidi=%ld\n", (uint32_t)hmidi);
 
   if (hmidi == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
   
-#ifdef USE_USBD_COMPOSITE
-  /* Get the Endpoints addresses allocated for this class instance */
-  MIDIOutEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, ClassId);
-#endif /* USE_USBD_COMPOSITE */
+//#ifdef USE_USBD_COMPOSITE
+//  /* Get the Endpoints addresses allocated for this class instance */
+//  MIDIOutEpAdd  = USBD_CoreGetEPAdd(pdev, USBD_EP_OUT, USBD_EP_TYPE_BULK, ClassId);
+//#endif /* USE_USBD_COMPOSITE */
 
   //hmidi->tx_buffer = buff;
   memcpy(hmidi->tx_buffer, buff, length);
@@ -1167,7 +1174,8 @@ uint8_t USBD_MIDI_SetTxBuffer(USBD_HandleTypeDef *pdev,
 #ifdef USE_USBD_COMPOSITE
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev, uint8_t ClassId)
 {
-  USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[ClassId];
+  //USBD_MIDI_HandleTypeDef *hmidi = (USBD_MIDI_HandleTypeDef *)pdev->pClassDataCmsit[ClassId];
+  USBD_MIDI_HandleTypeDef *hmidi = &midiHandle;
 #else
 uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
 {
@@ -1175,8 +1183,7 @@ uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
 #endif
   USBD_StatusTypeDef ret = USBD_BUSY;
 
-  //printf("MIDI TRANSMIT PACKET\n");
-
+  //printf("MIDI TRANSMIT PACKET, *hmidi=%ld\n", (uint32_t)hmidi);
 
   if (hmidi == NULL)
   {
@@ -1200,9 +1207,13 @@ uint8_t USBD_MIDI_TransmitPacket(USBD_HandleTypeDef *pdev)
     //printf("MIDI NOT BUSY\n");
     /* Transmit next packet */
     //(void)USBD_LL_Transmit(pdev, MIDIInEpAdd, hmidi->TxBuffer, hmidi->TxLength);
+    
+    printf("MIDI DEVICE LL_Transmit! EP=%d\n", MIDIInEpAdd);
     (void)USBD_LL_Transmit(pdev, MIDIInEpAdd, hmidi->tx_buffer, hmidi->tx_length);
 
     ret = USBD_OK;
+  } else {
+    printf("MIDI DEVICE IS BUSY!\n");
   }
 
   return (uint8_t)ret;

@@ -219,6 +219,7 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
   //printf("MIDI_Send_FS: chan = 0x%02x, msgtype = 0x%02x, b1 = 0x%02x, b2 = 0x%02x\n", cable, message, param1, param2);
 #ifdef USE_USBD_COMPOSITE
   uint32_t classId = USBD_CMPSIT_GetClassID(&hUsbDeviceFS, CLASS_TYPE_AUDIO, 0);
+  printf("MIDI_Send_FS classId = %ld\n", classId);
   USBD_MIDI_SetTxBuffer(&hUsbDeviceFS, buffer, length, classId);
 
   ret = USBD_MIDI_TransmitPacket(&hUsbDeviceFS, classId);

@@ -5,7 +5,10 @@
 #include "midi/MidiUSBMessage.h"
 #include "usbd_midi_if.h"
 
+#define MAX_ATTEMPTS      10
+
 extern USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS;
+
 class MidiHandler {
 public:
     MidiHandler() = default;
@@ -62,9 +65,13 @@ public:
         while(dequeueOutgoing(&msg)) {
             MidiUSBMessage umsg(0, msg);
             //MidiUSBMessage::dump(umsg);
+            uint8_t i = 0;
             do {
                 ret = USBD_MIDI_fops_FS.Send(umsg.getData(), 4);
-            } while(ret != USBD_OK);
+
+                //LL_mDelay(500);
+                //printf("USB Send #%d: status = %d\n", i, ret);
+            } while(ret != USBD_OK && i++ < MAX_ATTEMPTS);
         }
     }
 

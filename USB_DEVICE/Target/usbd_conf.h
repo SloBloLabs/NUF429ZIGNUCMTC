@@ -60,11 +60,11 @@
 #define USBD_CMPSIT_ACTIVATE_AUDIO                         1U
 
 /* The definition of endpoint numbers must respect the order of classes instantiation  */
-#define CDC_CMP_IN_EP                               0x81U  /* EP1 for CDC data IN */
 #define CDC_CMP_OUT_EP                              0x01U  /* EP1 for CDC data OUT */
-#define CDC_CMP_CMD_EP                              0x82U  /* EP2 for CDC commands */
+#define CDC_CMP_IN_EP                               0x81U  /* EP1 for CDC data IN */
+#define CDC_CMP_CMD_EP                              0x83U  /* EP2 for CDC commands */
 #define MIDI_CMP_OUT_EP                             0x02U  /* EP2 for MIDI data OUT */
-#define MIDI_CMP_IN_EP                              0x83U  /* EP3 for MIDI data IN */
+#define MIDI_CMP_IN_EP                              0x82U  /* EP3 for MIDI data IN */
 
 /** @defgroup USBD_CONF_Exported_Variables USBD_CONF_Exported_Variables
   * @brief Public variables.
@@ -94,8 +94,6 @@
 #define USBD_LPM_ENABLED     0U
 /*---------- -----------*/
 #define USBD_SELF_POWERED     1U
-/*---------- -----------*/
-#define USBD_AUDIO_FREQ     48000U
 /*---------- -----------*/
 #define USBD_DFU_MAX_ITF_NUM     1U
 /*---------- -----------*/
