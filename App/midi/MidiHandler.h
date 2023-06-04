@@ -69,8 +69,8 @@ public:
             do {
                 ret = USBD_MIDI_fops_FS.Send(umsg.getData(), 4);
 
-                //LL_mDelay(500);
-                //printf("USB Send #%d: status = %d\n", i, ret);
+                //if(i > 0)
+                //  printf("USB Send #%d: status = %d\n", i, ret);
             } while(ret != USBD_OK && i++ < MAX_ATTEMPTS);
         }
     }

@@ -9,15 +9,14 @@
 MidiHandler midiHandler;
 
 void cdcTest();
-void midiTest1();
-void midiTest2();
+void midiTest();
 
 void projectMain() {
     // Configure and enable Systick timer including interrupt
     SysTick_Config(SystemCoreClock / 1000 - 1);
 
     //cdcTest();
-    midiTest1();
+    midiTest();
 
 }
 
@@ -32,12 +31,11 @@ void cdcTest() {
     }
 }
 
-void midiTest1() {
+void midiTest() {
 
     midiHandler.init();
 
     while(true) {
-
         while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin)) {
 
           MidiMessage msg;
@@ -49,51 +47,11 @@ void midiTest1() {
           }
         }
 
-        printf("New Button Presss!!!\n");
-        char const *data = "Play note!\n";
+        uint8_t midiChannel = 15;
+        uint8_t timeSpan = 200;
+
+        char const *data = "Play Melody!\n";
         CDC_Transmit_FS((uint8_t*)data, strlen(data));
-
-        uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
-        uint8_t midiChannel = 15;
-        uint8_t timeSpan = 200;
-
-        MidiMessage msg = pinSet ?
-            MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
-            MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
-
-        midiHandler.enqueueOutgoing(msg);
-        midiHandler.processOutgoing();
-        LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-
-        LL_mDelay(timeSpan);
-
-        //msg = MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
-        //midiHandler.enqueueOutgoing(msg);
-        //midiHandler.processOutgoing();
-        //LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-
-        //LL_mDelay(timeSpan);
-    }
-}
-
-void midiTest2() {
-
-    midiHandler.init();
-
-    while(true) {
-        while(!LL_GPIO_IsInputPinSet(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin)) {
-
-          MidiMessage msg;
-          while(midiHandler.dequeueIncoming(&msg)) {
-            printf("Midi Receive: ");
-            MidiMessage::dump(msg);
-
-            LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-          }
-        }
-
-        uint8_t midiChannel = 15;
-        uint8_t timeSpan = 200;
 
         MidiMessage msg;
         msg = MidiMessage::makeNoteOn(midiChannel, 0x3C, 100);
@@ -141,19 +99,19 @@ void midiTest2() {
         midiHandler.processOutgoing();
         LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
 
-        for(uint8_t i = 0; i < 2; ++i) {
-            LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-            uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
-            //printf("loop %d\n", i);
-            MidiMessage msg = pinSet ?
-                MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
-                MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
-            printf("Midi Send: ");
-            MidiMessage::dump(msg);
-            midiHandler.enqueueOutgoing(msg);
-            midiHandler.processOutgoing();
-            LL_mDelay(100);
-        }
+        //for(uint8_t i = 0; i < 2; ++i) {
+        //    LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+        //    uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
+        //    //printf("loop %d\n", i);
+        //    MidiMessage msg = pinSet ?
+        //        MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
+        //        MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
+        //    printf("Midi Send: ");
+        //    MidiMessage::dump(msg);
+        //    midiHandler.enqueueOutgoing(msg);
+        //    midiHandler.processOutgoing();
+        //    LL_mDelay(100);
+        //}
     }
 }
 
