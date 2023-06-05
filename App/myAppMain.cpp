@@ -10,6 +10,7 @@ MidiHandler midiHandler;
 
 void cdcTest();
 void midiTest();
+void multiMidiSend();
 
 void projectMain() {
     // Configure and enable Systick timer including interrupt
@@ -17,6 +18,7 @@ void projectMain() {
 
     //cdcTest();
     midiTest();
+    //multiMidiSend();
 
 }
 
@@ -99,19 +101,23 @@ void midiTest() {
         midiHandler.processOutgoing();
         LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
 
-        //for(uint8_t i = 0; i < 2; ++i) {
-        //    LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
-        //    uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
-        //    //printf("loop %d\n", i);
-        //    MidiMessage msg = pinSet ?
-        //        MidiMessage::makeNoteOn(midiChannel, 0x3C, 100) :
-        //        MidiMessage::makeNoteOff(midiChannel, 0x3C, 100);
-        //    printf("Midi Send: ");
-        //    MidiMessage::dump(msg);
-        //    midiHandler.enqueueOutgoing(msg);
-        //    midiHandler.processOutgoing();
-        //    LL_mDelay(100);
-        //}
+        LL_GPIO_ResetOutputPin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+
+        for(int n = 0; n < 4; ++n) {
+          LL_GPIO_TogglePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|LED_BLUE_Pin);
+          for(uint8_t i = 0; i < 16; ++i) {
+              uint32_t pinSet = LL_GPIO_IsOutputPinSet(GPIOB, LED_GREEN_Pin);
+              //printf("loop %d\n", i);
+              MidiMessage msg = pinSet ?
+                  MidiMessage::makeNoteOn(midiChannel, (0x30 + (i << 1)), 100) :
+                  MidiMessage::makeNoteOff(midiChannel, (0x30 + (i << 1)), 100);
+              //printf("Midi Send: ");
+              //MidiMessage::dump(msg);
+              midiHandler.enqueueOutgoing(msg);
+          }
+          midiHandler.processOutgoing();
+          LL_mDelay(300);
+        }
     }
 }
 
@@ -122,6 +128,10 @@ void enqueueIncomingMidi(uint8_t *data) {
     MidiMessage msg;
     umsg.getMidiMessage(msg);
     midiHandler.enqueueIncoming(msg);
+}
+
+void midiTrxSentCallback() {
+    midiHandler.setBusy(false);
 }
 
 }

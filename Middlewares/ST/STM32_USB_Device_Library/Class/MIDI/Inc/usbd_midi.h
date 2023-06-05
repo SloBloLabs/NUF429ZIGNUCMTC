@@ -178,6 +178,7 @@ typedef struct
   int8_t (*DeInit)  (USBD_HandleTypeDef *pdev, uint8_t cfgidx);
   int8_t (*Receive) (uint8_t* pbuf, uint32_t size);
   int8_t (*Send)    (uint8_t* pbuf, uint32_t size);
+  void   (*TransmitComplete)(uint8_t *Buf, uint32_t Len, uint8_t epnum);
 } USBD_MIDI_ItfTypeDef;
 
 

@@ -810,6 +810,8 @@ static uint8_t USBD_MIDI_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   if(epnum == (MIDIInEpAdd & 0x7F)) // TODO: check why epnum does not come as 0x81 as expected
   {
     hmidi->tx_busy = 0;
+    
+    ((USBD_MIDI_ItfTypeDef *)pdev->pUserData[pdev->classId])->TransmitComplete(hmidi->tx_buffer, hmidi->tx_length, epnum);
     //printf("MIDI DATA IN, hmidi=%ld, midi busy = %d\n", (uint32_t)hmidi, hmidi->tx_busy);
   }
 

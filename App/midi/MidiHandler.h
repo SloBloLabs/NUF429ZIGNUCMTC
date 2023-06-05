@@ -17,6 +17,9 @@ public:
     inline void init() {
         _incoming.init();
         _outgoing.init();
+        _cableNumber = 0;
+        _busy = 0;
+        memset(_sendBuffer, 0, USB_FS_MAX_PACKET_SIZE);
     }
 
     inline void enqueueOutgoing(MidiMessage &msg) {
@@ -60,22 +63,60 @@ public:
     }
 
     inline void processOutgoing() {
-        MidiMessage msg;
-        uint8_t ret; // USBD_StatusTypeDef
-        while(dequeueOutgoing(&msg)) {
-            MidiUSBMessage umsg(0, msg);
-            //MidiUSBMessage::dump(umsg);
-            uint8_t i = 0;
-            do {
-                ret = USBD_MIDI_fops_FS.Send(umsg.getData(), 4);
-
-                //if(i > 0)
-                //  printf("USB Send #%d: status = %d\n", i, ret);
-            } while(ret != USBD_OK && i++ < MAX_ATTEMPTS);
+        if(busy()) {
+            return;
         }
+        
+        setBusy(true);
+
+        MidiMessage msg;
+        uint8_t n = 0;
+        uint8_t ret; // USBD_StatusTypeDef
+
+        // collect messages into send buffer
+        while(dequeueOutgoing(&msg) && n < USB_FS_MAX_PACKET_SIZE) {
+            MidiUSBMessage umsg(_cableNumber, msg);
+            //MidiUSBMessage::dump(umsg);
+
+            memcpy((_sendBuffer + n), umsg.getData(), 4);
+            n += 4;
+        }
+
+        //printf("%d message bytes collected\n", n);
+
+        // send messages to USB
+        uint8_t i = 0;
+        do {
+            ret = USBD_MIDI_fops_FS.Send(_sendBuffer, n);
+
+            //if(i > 0)
+            //  printf("USB Send #%d: status = %d\n", i, ret);
+        } while(ret != USBD_OK && i++ < MAX_ATTEMPTS);
+    }
+
+    inline uint8_t cableNumber() const {
+        return _cableNumber;
+    }
+
+    inline void setCableNumber(const uint8_t cableNumber) {
+        _cableNumber = cableNumber;
+    }
+
+    inline bool busy() const {
+        return _busy;
+    }
+
+    inline void setBusy(const bool busy) {
+        _busy = busy;
     }
 
 private:
-    RingBuffer<MidiMessage, 20> _incoming;
-    RingBuffer<MidiMessage, 20> _outgoing;
+    RingBuffer<MidiMessage, USB_FS_MAX_PACKET_SIZE << 1> _incoming;
+    RingBuffer<MidiMessage, USB_FS_MAX_PACKET_SIZE << 1> _outgoing;
+
+    uint8_t _cableNumber;
+    volatile bool _busy;
+
+    uint8_t _sendBuffer[USB_FS_MAX_PACKET_SIZE];
+
 };

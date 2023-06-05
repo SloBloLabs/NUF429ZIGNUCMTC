@@ -103,7 +103,8 @@
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern uint32_t USBD_CMPSIT_GetClassID(USBD_HandleTypeDef *pdev, USBD_CompositeClassTypeDef Class, uint32_t Instance);
 
-void enqueueIncomingMidi(uint8_t *data);
+extern void enqueueIncomingMidi(uint8_t *data);
+extern void midiTrxSentCallback();
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
@@ -122,6 +123,7 @@ static int8_t MIDI_Init_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static int8_t MIDI_DeInit_FS(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static int8_t MIDI_Receive_FS(uint8_t* pbuf, uint32_t length);
 static int8_t MIDI_Send_FS(uint8_t* pbuf, uint32_t length);
+static void   MIDI_TrxComplete_FS(uint8_t* pbuf, uint32_t length, uint8_t epnum);
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_DECLARATION */
 
@@ -136,7 +138,8 @@ USBD_MIDI_ItfTypeDef USBD_MIDI_fops_FS =
   MIDI_Init_FS,
   MIDI_DeInit_FS,
   MIDI_Receive_FS,
-  MIDI_Send_FS
+  MIDI_Send_FS,
+  MIDI_TrxComplete_FS
 };
 
 /* Private functions ---------------------------------------------------------*/
@@ -229,6 +232,11 @@ static int8_t MIDI_Send_FS(uint8_t* buffer, uint32_t length)
   ret = USBD_MIDI_TransmitPacket(&hUsbDeviceFS);
 #endif /* USE_USBD_COMPOSITE */
   return (ret);
+}
+
+static void MIDI_TrxComplete_FS(uint8_t* pbuf, uint32_t length, uint8_t epnum) {
+  //printf("TRX complete, len = %ld\n", length);
+  midiTrxSentCallback();
 }
 
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
