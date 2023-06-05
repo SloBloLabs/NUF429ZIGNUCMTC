@@ -25,8 +25,7 @@
 #include "usbd_core.h"
 
 #include "usbd_composite_builder.h"
-//#include "usbd_cdc.h"
-#include "usbd_dfu.h"
+#include "usbd_cdc.h"
 //#include "usbd_audio.h"
 
 /* USER CODE BEGIN Includes */
@@ -655,7 +654,7 @@ USBD_StatusTypeDef USBD_LL_SetTestMode(USBD_HandleTypeDef *pdev, uint8_t testmod
   */
 void *USBD_static_malloc(uint32_t size)
 {
-  static uint32_t mem[(sizeof(USBD_DFU_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+  static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
   //static uint32_t mem[(size/4)+1];/* On 32-bit boundary */
   //uint32_t* p = (uint32_t*) malloc(size + 1);
   //return p;

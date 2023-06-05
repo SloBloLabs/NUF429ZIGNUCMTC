@@ -56,7 +56,6 @@
 
 /* Activate Printer and CDC classes in composite builder */
 #define USBD_CMPSIT_ACTIVATE_CDC                           1U
-#define USBD_CMPSIT_ACTIVATE_DFU                           1U
 #define USBD_CMPSIT_ACTIVATE_AUDIO                         1U
 
 /* The definition of endpoint numbers must respect the order of classes instantiation  */

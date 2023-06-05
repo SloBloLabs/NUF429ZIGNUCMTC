@@ -24,7 +24,6 @@
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_cdc_if.h"
-#include "usbd_dfu_if.h"
 #include "usbd_midi_if.h"
 
 /* USER CODE BEGIN Includes */
@@ -90,16 +89,6 @@ void MX_USB_DEVICE_Init(void)
 //    Error_Handler();
 //  }
 #endif
-#if USBD_CMPSIT_ACTIVATE_DFU == 1
-  if (USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_DFU, CLASS_TYPE_DFU, NULL) != USBD_OK)
-  {
-    Error_Handler();
-  }
-//  if (USBD_RegisterClass(&hUsbDeviceFS, &USBD_DFU) != USBD_OK)
-//  {
-//    Error_Handler();
-//  }
-#endif
 #if USBD_CMPSIT_ACTIVATE_AUDIO == 1
   if (USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_MIDI, CLASS_TYPE_AUDIO, MIDI_EpAdd) != USBD_OK)
   {
@@ -108,16 +97,6 @@ void MX_USB_DEVICE_Init(void)
 #endif
 
 
-#if USBD_CMPSIT_ACTIVATE_DFU == 1
-  /* Add DFU Interface Class First Instance */
-  if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_DFU, 0) != 0xFF)
-  {
-    if (USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_fops_FS) != USBD_OK)
-    {
-      Error_Handler();
-    }
-  }
-#endif
 #if USBD_CMPSIT_ACTIVATE_CDC == 1
   /* Add CDC Interface Class First Instance */
   if (USBD_CMPSIT_SetClassID(&hUsbDeviceFS, CLASS_TYPE_CDC, 0) != 0xFF)
