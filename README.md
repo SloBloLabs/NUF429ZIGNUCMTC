@@ -61,8 +61,8 @@ git merge --no-commit --no-ff <other branch>
 
 Composite USB interface:
 
-3 configurations
-4 interfaces
+1 configuration
+3 interfaces (2*CDC + 1*MIDI)
 6 endpoints
 
 configuration 1:
@@ -75,22 +75,14 @@ configuration 1:
  - 4 endpoints overall
    - EP0
    - EP1
-   - EP2 (in only: 0x82)
+   - EP3 (in only: 0x83)
 
 configuration 2:
- - DFU
- - 1 interface
-   - 0: application specific/DFU
- - 1 endpoint overall
-   - EP0 only
-
-configuration 3:
  - MIDI
  - 1 interface
    - 0: Audio/Streaming
      - 2 endpoints 0x02 + 0x83 (BULK)
  - 3 endpoints overall
    - EP0
-   - EP2 (out only: 0x02)
-   - EP3 (in only: 0x83)
+   - EP2
 
